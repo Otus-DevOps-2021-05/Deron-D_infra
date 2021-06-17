@@ -117,6 +117,7 @@ appuser@someinternalhost:~$
 
 ```
 - Дополнительное задание:
+
 На локальной машине правим /etc/hosts
 ```
 sudo bash -c 'echo "10.128.0.23 someinternalhost" >> /etc/hosts'
