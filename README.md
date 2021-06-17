@@ -83,4 +83,66 @@ appuser@someinternalhost:~$ ip a show eth0
 
 ```
 
+- Проверим отсутствие каких-либо приватных ключей на bastion машине:
+```
+appuser@bastion:~$ ls -la ~/.ssh/
+total 16
+drwx------ 2 appuser appuser 4096 Jun 17 14:46 .
+drwxr-xr-x 4 appuser appuser 4096 Jun 17 14:36 ..
+-rw------- 1 appuser appuser  561 Jun 17 14:07 authorized_keys
+-rw-r--r-- 1 appuser appuser  444 Jun 17 15:32 known_hosts
+```
+
+- Самостоятельное задание. Исследовать способ подключения к someinternalhost в одну команду из вашего рабочего устройства:
+Добавим в ~/.ssh/config содержимое:
+```
+dpp@h470m ~/otus-devops/Deron-D_infra $ cat ~/.ssh/config
+Host 178.154.255.112
+  User appuser
+  IdentityFile /home/dpp/.ssh/appuser
+Host 10.128.0.23
+  User appuser
+  ProxyCommand ssh -W %h:%p 178.154.255.112
+  IdentityFile /home/dpp/.ssh/appuser
+```
+Проверяем работоспособность найденного решения:
+```
+~/otus-devops/Deron-D_infra $ ssh 10.128.0.23
+Welcome to Ubuntu 16.04.7 LTS (GNU/Linux 4.4.0-142-generic x86_64)
+
+ * Documentation:  https://help.ubuntu.com
+ * Management:     https://landscape.canonical.com
+ * Support:        https://ubuntu.com/advantage
+appuser@someinternalhost:~$
+
+```
+- Дополнительное задание:
+На локальной машине правим /etc/hosts
+```
+sudo bash -c 'echo "10.128.0.23 someinternalhost" >> /etc/hosts'
+```
+
+Добавим в ~/.ssh/config содержимое:
+```
+Host someinternalhost
+  User appuser
+  ProxyCommand ssh -W %h:%p 178.154.255.112
+  IdentityFile /home/dpp/.ssh/appuser
+```
+
+Проверяем:
+```
+ ~/otus-devops/Deron-D_infra $ ssh someinternalhost
+Welcome to Ubuntu 16.04.7 LTS (GNU/Linux 4.4.0-142-generic x86_64)
+
+ * Documentation:  https://help.ubuntu.com
+ * Management:     https://landscape.canonical.com
+ * Support:        https://ubuntu.com/advantage
+appuser@someinternalhost:~$
+
+```
+
+ssh someinternalhost
+
 ## **Полезное:**
+- [SSH: подключение в приватную сеть через Bastion и немного про Multiplexing](https://rtfm.co.ua/ssh-podklyuchenie-v-privatnuyu-set-cherez-bastion-i-nemnogo-pro-multiplexing/)
