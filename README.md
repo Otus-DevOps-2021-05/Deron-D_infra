@@ -54,7 +54,6 @@ ECDSA key fingerprint is SHA256:WsrgIfB+b7qerWOk1tNLqeyGmKoBfKdWkdVJKVzo6u8.
 Are you sure you want to continue connecting (yes/no/[fingerprint])? yes
 Warning: Permanently added '10.129.0.18' (ECDSA) to the list of known hosts.
 appuser@10.129.0.18: Permission denied (publickey).
-
 ```
 
 4. Используем Bastion host для прямого подключения к инстансам внутренней сети:
@@ -63,7 +62,6 @@ appuser@10.129.0.18: Permission denied (publickey).
  ~/otus-devops/Deron-D_infra $ eval $(ssh-agent -s)
 Agent pid 1739595
 ```
-
 - Добавим приватный ключ в ssh агент авторизации:
 ```
 ~/otus-devops/Deron-D_infra $ ssh-add ~/.ssh/appuser
@@ -182,6 +180,7 @@ Last login: Sun Jun 20 14:03:20 2021 from 10.129.0.30
 ```
 
 - Создаем VPN-сервер для серверов Yandex.Cloud:
+
 Создан скрипт установки VPN-сервера (setupvpn.sh)[./setupvpn.sh]
 
 [Веб-интерфейс VPN-сервера Pritunl](https://84-252-136-193.sslip.io/#dashboard)
