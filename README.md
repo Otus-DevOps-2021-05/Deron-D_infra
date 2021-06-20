@@ -189,5 +189,6 @@ Last login: Sun Jun 20 14:03:20 2021 from 10.129.0.30
 bastion_IP = 84.252.136.193
 someinternalhost_IP = 10.129.0.18
 
+
 ## **Полезное:**
 - [SSH: подключение в приватную сеть через Bastion и немного про Multiplexing](https://rtfm.co.ua/ssh-podklyuchenie-v-privatnuyu-set-cherez-bastion-i-nemnogo-pro-multiplexing/)
