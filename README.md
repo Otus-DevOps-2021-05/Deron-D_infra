@@ -181,5 +181,13 @@ Failed to connect to https://changelogs.ubuntu.com/meta-release-lts. Check your 
 Last login: Sun Jun 20 14:03:20 2021 from 10.129.0.30
 ```
 
+- Создаем VPN-сервер для серверов Yandex.Cloud:
+Создан скрипт установки VPN-сервера (setupvpn.sh)[./setupvpn.sh]
+
+[Веб-интерфейс VPN-сервера Pritunl](https://84-252-136-193.sslip.io/#dashboard)
+
+bastion_IP = 84.252.136.193
+someinternalhost_IP = 10.129.0.18
+
 ## **Полезное:**
 - [SSH: подключение в приватную сеть через Bastion и немного про Multiplexing](https://rtfm.co.ua/ssh-podklyuchenie-v-privatnuyu-set-cherez-bastion-i-nemnogo-pro-multiplexing/)
