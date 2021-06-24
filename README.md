@@ -83,7 +83,7 @@ yc compute instance create \
  --metadata serial-port-enable=1
 ```
 
-Содержимое [metadata.yml](./metadata.yml):
+Содержимое [metadata.yaml](./metadata.yaml):
 ```
 #cloud-config
 users:
