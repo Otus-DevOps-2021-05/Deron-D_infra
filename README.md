@@ -19,3 +19,11 @@
 ## **Полезное:**
 testapp_IP = 178.154.229.106
 testapp_port = 9292
+testapp_IP =
+testapp_port = 9292
+testapp_IP =
+testapp_port = 9292
+testapp_IP = 217.28.231.106
+testapp_port = 9292
+testapp_IP = 178.154.204.237
+testapp_port = 9292
