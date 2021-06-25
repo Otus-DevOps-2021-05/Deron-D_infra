@@ -16,7 +16,7 @@
 1. Установлен Packer
 
 <details>
- <summary>Установка Packer</summary>
+ <summary>Установка Packer (CentOS/RHEL)</summary>
 
 ```
 sudo yum install -y yum-utils
