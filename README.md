@@ -16,6 +16,7 @@
 1. Установлен Packer
 
 <details>
+ <summary>Установка Packer</summary>
 
 ```
 sudo yum install -y yum-utils
