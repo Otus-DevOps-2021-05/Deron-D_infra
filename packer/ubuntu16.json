@@ -1,0 +1,26 @@
+{
+    "builders": [
+        {
+            "type": "yandex",
+            "service_account_key_file": "~/.yc_keys/key.json",
+            "folder_id": "b1gu87e4thvariradsue",
+            "source_image_family": "ubuntu-1604-lts",
+            "image_name": "reddit-base-{{timestamp}}",
+            "image_family": "reddit-base",
+            "ssh_username": "ubuntu",
+            "platform_id": "standard-v1"
+        }
+    ],
+    "provisioners": [
+        {
+            "type": "shell",
+            "script": "scripts/install_ruby.sh",
+            "execute_command": "sudo {{.Path}}"
+        },
+        {
+            "type": "shell",
+            "script": "scripts/install_mongodb.sh",
+            "execute_command": "sudo {{.Path}}"
+        }
+    ]
+}
