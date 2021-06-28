@@ -101,6 +101,7 @@ packer build -var-file=./variables.json immutable.json
 ```
 
 11. Автоматизация создания ВМ `*`
+- Создан [create-reddit-vm.sh](./config-scripts/create-reddit-vm.sh)
 
 
 </details>
