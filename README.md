@@ -13,7 +13,7 @@
 ---
 
 ## **Выполнено:**
-1. Установлен Packer
+1. Установлен Packer:
 
 <details>
  <summary>Установка Packer (CentOS/RHEL)</summary>
@@ -26,5 +26,50 @@ sudo yum -y install packer
 
 </details>
 
+2.1 Создан сервисный аккаунт:
 
+<details>
+ <summary>Создание сервисного аккаунта для Packer в Yandex Cloud</summary>
+
+```
+SVC_ACCT="svcuser"
+FOLDER_ID="b1gu87e4thvariradsue"
+yc iam service-account create --name $SVC_ACCT --folder-id $FOLDER_ID
+```
+
+</details>
+
+2.2 Делегированы правы сервисному аккаунту для Packer:
+
+<details>
+ <summary>Делегирование прав сервисному аккаунту для Packer</summary>
+
+```
+$ ACCT_ID=$(yc iam service-account get $SVC_ACCT | \
+grep ^id | \
+awk '{print $2}')
+$ yc resource-manager folder add-access-binding --id $FOLDER_ID \
+--role editor \
+--service-account-id $ACCT_ID
+```
+
+2.3 Создан service account key file
+<details>
+ <summary>Создание service account key file</summary>
+
+```
+Deron-D_infra git:(packer-base) ✗  yc iam key create --service-account-id $ACCT_ID --output ~/.yc_keys/key.json
+id: aje6jvgee8cm640mh2b0
+service_account_id: ajeeg8qoctaevkcq8jmv
+created_at: "2021-06-28T13:08:50.312786870Z"
+key_algorithm: RSA_2048
+
+Deron-D_infra git:(packer-base) ✗ ll ~/.yc_keys
+total 4.0K
+-rw-------. 1 dpp dpp 2.4K Jun 28 16:08 key.json
+```
+
+
+
+</details>
 ## **Полезное:**
