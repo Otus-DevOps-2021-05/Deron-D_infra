@@ -64,6 +64,28 @@ total 4.0K
 packer validate ./ubuntu16.json
 ```
 
+6. Произведен запуск сборки образа
+```
+packer build ./ubuntu16.json
+```
+
+7. Создана ВМ с использованием созданного образа
+
+8. Выполнено "дожаривание" ВМ для запуска приложения:
+```
+sudo apt-get update
+sudo apt-get install -y git
+git clone -b monolith https://github.com/express42/reddit.git
+cd reddit && bundle install
+puma -d
+```
+
+9. Выполнено параметризирование шаблона с применением [variables.json.example](https://raw.githubusercontent.com/Otus-DevOps-2021-05/Deron-D_infra/packer-base/packer/variables.json.example)
+
+10. Построение bake-образа `*`
+
+11. Автоматизация создания ВМ `*`
+
 </details>
 
 ## **Полезное:**
