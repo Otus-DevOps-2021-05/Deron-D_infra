@@ -55,7 +55,7 @@ total 4.0K
 -rw-------. 1 dpp dpp 2.4K Jun 28 16:08 key.json
 ```
 
-3. Создан файла-шаблона Packer
+3. Создан файла-шаблона Packer (ubuntu16.json)[https://raw.githubusercontent.com/Otus-DevOps-2021-05/Deron-D_infra/packer-base/packer/ubuntu16.json]
 
 4. Созданы скрипты для provisioners
 
