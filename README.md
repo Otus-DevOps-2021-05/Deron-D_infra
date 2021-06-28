@@ -10,40 +10,29 @@
 
 Критерии оценки:
 0 б. - задание не выполнено 1 б. - задание выполнено 2 б. - выполнены все дополнительные задания
+
 ---
 
 ## **Выполнено:**
-1. Установлен Packer:
 
 <details>
- <summary>Установка Packer (CentOS/RHEL)</summary>
+ <summary>Подробнее</summary>
 
+1. Установлен Packer:
 ```
 sudo yum install -y yum-utils
 sudo yum-config-manager --add-repo https://rpm.releases.hashicorp.com/RHEL/hashicorp.repo
 sudo yum -y install packer
 ```
 
-</details>
-
 2.1 Создан сервисный аккаунт:
-
-<details>
- <summary>Создание сервисного аккаунта для Packer в Yandex Cloud</summary>
-
 ```
 SVC_ACCT="svcuser"
 FOLDER_ID="b1gu87e4thvariradsue"
 yc iam service-account create --name $SVC_ACCT --folder-id $FOLDER_ID
 ```
 
-</details>
-
 2.2 Делегированы правы сервисному аккаунту для Packer:
-
-<details>
- <summary>Делегирование прав сервисному аккаунту для Packer</summary>
-
 ```
 $ ACCT_ID=$(yc iam service-account get $SVC_ACCT | \
 grep ^id | \
@@ -54,9 +43,6 @@ $ yc resource-manager folder add-access-binding --id $FOLDER_ID \
 ```
 
 2.3 Создан service account key file
-<details>
- <summary>Создание service account key file</summary>
-
 ```
 Deron-D_infra git:(packer-base) ✗  yc iam key create --service-account-id $ACCT_ID --output ~/.yc_keys/key.json
 id: aje6jvgee8cm640mh2b0
@@ -69,7 +55,15 @@ total 4.0K
 -rw-------. 1 dpp dpp 2.4K Jun 28 16:08 key.json
 ```
 
+3. Создан файла-шаблона Packer
 
+4. Созданы скрипты для provisioners
+
+5. Выполнена проверка на ошибки
+```
+packer validate ./ubuntu16.json
+```
 
 </details>
+
 ## **Полезное:**

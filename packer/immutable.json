@@ -2,8 +2,8 @@
     "builders": [
         {
             "type": "yandex",
-            "image_name": "reddit-base-{{timestamp}}",
-            "image_family": "reddit-base",
+            "image_name": "reddit-full-{{timestamp}}",
+            "image_family": "reddit-full",
             "ssh_username": "ubuntu",
             "platform_id": "standard-v2",
             "use_ipv4_nat": true,
@@ -23,6 +23,24 @@
             "type": "shell",
             "script": "scripts/install_mongodb.sh",
             "execute_command": "sudo {{.Path}}"
-        }
+        },
+	{
+            "type": "file",
+            "source": "files/puma.service",
+            "destination": "/tmp/puma.service"
+	},
+	{
+            "type": "shell",
+            "inline": [
+                "sudo mv /tmp/puma.service /etc/systemd/system/puma.service",
+                "cd /opt",
+                "sudo apt-get install -y git",
+                "sudo git clone -b monolith https://github.com/express42/reddit.git",
+                "cd reddit && bundle install",
+                "sudo systemctl daemon-reload",
+		"sudo systemctl enable puma",
+		"sudo systemctl start puma"
+             ]
+	}
     ]
 }
