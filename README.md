@@ -1,6 +1,6 @@
 # **Домашнее задание №5: Сборка образов VM при помощи Packer**
 <details>
-  <summary>Домашнее задание №5: Сборка образов VM при помощи Packer</summary>
+  <summary>Сборка образов VM при помощи Packer</summary>
 
 ## **Задание:**
 <details>
