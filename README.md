@@ -1,8 +1,10 @@
 # **Домашнее задание №5: Сборка образов VM при помощи Packer**
+<details>
+  <summary>Домашнее задание №5: Сборка образов VM при помощи Packer</summary>
 
 ## **Задание:**
 <details>
- <summary>Задание</summary>
+ <summary>Подробнее</summary>
 Подготовка базового образа VM при помощи Packer.
 
 Цель:
@@ -109,3 +111,5 @@ packer build -var-file=./variables.json immutable.json
 </details>
 
 ## **Полезное:**
+
+</details>
