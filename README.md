@@ -1,121 +1,109 @@
-# **Домашнее задание №4: Деплой тестового приложения**
+# **Домашнее задание №5: Сборка образов VM при помощи Packer**
 
 ## **Задание:**
-Практика управления ресурсами yandex cloud через yc.
+Подготовка базового образа VM при помощи Packer.
 
 Цель:
-В данном дз произведет ручной деплой тестового приложения. Напишет bash скрипт для автоматизации задач настройки VM и деплоя приложения. В данном задании тренируются навыки: деплоя приложения на сервер, написания bash скриптов.
+В данном дз студент произведет сборку готового образа с уже установленным приложением при помощи Packer. Задеплоит приложение в Compute Engine при помощи ранее подготовленного образа. В данном задании тренируются навыки: работы с Packer, работы с GCP Compute Engine.
 
-Ручной деплой тестового приложения. Написание bash скриптов для автоматизации задач настройки VM и деплоя приложения. Все действия описаны в методическом указании.
+Все действия описаны в методическом указании.
 
 Критерии оценки:
 0 б. - задание не выполнено 1 б. - задание выполнено 2 б. - выполнены все дополнительные задания
 
-testapp_IP = 217.28.229.75
-testapp_port = 9292
 ---
 
 ## **Выполнено:**
 
-- Установлен YC CLI:
+<details>
+ <summary>Подробнее</summary>
+
+1. Установлен Packer:
 ```
-curl https://storage.yandexcloud.net/yandexcloud-yc/install.sh | bash
+sudo yum install -y yum-utils
+sudo yum-config-manager --add-repo https://rpm.releases.hashicorp.com/RHEL/hashicorp.repo
+sudo yum -y install packer
 ```
 
-- Создан новый инстанс reddit-app [create_instance.sh][./create_instance.sh]:
+2.1 Создан сервисный аккаунт:
 ```
-yc compute instance create \
- --name reddit-app \
- --hostname reddit-app \
- --memory=4 \
- --create-boot-disk image-folder-id=standard-images,image-family=ubuntu-1604-lts,size=10GB \
- --network-interface subnet-name=default-ru-central1-a,nat-ip-version=ipv4 \
- --metadata serial-port-enable=1 \
- --ssh-key ~/.ssh/appuser.pub
+SVC_ACCT="svcuser"
+FOLDER_ID="b1gu87e4thvariradsue"
+yc iam service-account create --name $SVC_ACCT --folder-id $FOLDER_ID
 ```
 
-- Установлен Ruby [install_ruby.sh](.\install_ruby.sh):
+2.2 Делегированы правы сервисному аккаунту для Packer:
 ```
-sudo apt update
-sudo apt install -y ruby-full ruby-bundler build-essential
-```
-
-- Проверен Ruby и Bundler:
-```
-$ ruby -v
-ruby 2.3.1p112 (2016-04-26) [x86_64-linux-gnu]
-$ bundler -v
-Bundler version 1.11.2
+$ ACCT_ID=$(yc iam service-account get $SVC_ACCT | \
+grep ^id | \
+awk '{print $2}')
+$ yc resource-manager folder add-access-binding --id $FOLDER_ID \
+--role editor \
+--service-account-id $ACCT_ID
 ```
 
-- Установлен и запущен MongoDB [install_mongodb.sh](./install_mongodb.sh):
+2.3 Создан service account key file
 ```
-wget -qO - https://www.mongodb.org/static/pgp/server-4.2.asc | sudo apt-key add -
-echo "deb [ arch=amd64,arm64 ] https://repo.mongodb.org/apt/ubuntu xenial/mongodb-org/4.2 multiverse" | sudo tee /etc/apt/sources.list.d/mongodb-org-4.2.list
+Deron-D_infra git:(packer-base) ✗  yc iam key create --service-account-id $ACCT_ID --output ~/.yc_keys/key.json
+id: aje6jvgee8cm640mh2b0
+service_account_id: ajeeg8qoctaevkcq8jmv
+created_at: "2021-06-28T13:08:50.312786870Z"
+key_algorithm: RSA_2048
 
+Deron-D_infra git:(packer-base) ✗ ll ~/.yc_keys
+total 4.0K
+-rw-------. 1 dpp dpp 2.4K Jun 28 16:08 key.json
+```
+
+3. Создан файла-шаблона Packer [ubuntu16.json](https://raw.githubusercontent.com/Otus-DevOps-2021-05/Deron-D_infra/packer-base/packer/ubuntu16.json)
+
+4. Созданы скрипты для provisioners [install_ruby.sh](https://raw.githubusercontent.com/Otus-DevOps-2021-05/Deron-D_infra/packer-base/packer/scripts/install_ruby.sh);[install_mongodb.sh](https://raw.githubusercontent.com/Otus-DevOps-2021-05/Deron-D_infra/packer-base/packer/scripts/install_mongodb.sh)
+
+5. Выполнена проверка на ошибки
+```
+packer validate ./ubuntu16.json
+```
+
+6. Произведен запуск сборки образа
+```
+packer build ./ubuntu16.json
+```
+
+7. Создана ВМ с использованием созданного образа
+
+8. Выполнено "дожаривание" ВМ для запуска приложения:
+```
 sudo apt-get update
-sudo apt-get install -y apt-transport-https ca-certificates
-
-sudo apt-get update
-sudo apt-get install -y mongodb-org
-
-sudo systemctl start mongod
-sudo systemctl enable mongod
-```
-
-- Выполнен деплой приложения [deploy.sh](./deploy.sh):
-```
 sudo apt-get install -y git
 git clone -b monolith https://github.com/express42/reddit.git
 cd reddit && bundle install
-
-```
-
-- Дополнительное задание:
-
-Для создания инстанса с развернутым приложением достаточно запустить:
-```
-yc compute instance create \
- --name reddit-app \
- --hostname reddit-app \
- --memory=4 \
- --create-boot-disk image-folder-id=standard-images,image-family=ubuntu-1604-lts,size=10GB \
- --network-interface subnet-name=default-ru-central1-a,nat-ip-version=ipv4 \
- --metadata-from-file user-data=metadata.yaml \
- --metadata serial-port-enable=1
-```
-
-Содержимое [metadata.yaml](./metadata.yaml):
-```
-#cloud-config
-users:
-  - default
-  - name: yc-user
-    groups: sudo
-    shell: /bin/bash
-    sudo: ['ALL=(ALL) NOPASSWD:ALL']
-    ssh-authorized-keys:
-      - "ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABgQDUSGRF2QvKndsn1hbFv93CgS3/AiwCoETwjHL6Wzkyape+sW5EXKT/MXjCTlBVfqPtKWvY2pqXpEY7oJAOmJJrBvwnuod2SzEEoFncK1YOLXJOhzeXkT1+1cgo27jJYb4TQTWjawCYv48kJnPNwSL/jNLGQSdosfH3POQVWkB3xCjoLZ7/kMqZQbFEvol5BI5T0HM7uKtPJdWUPD0X1Jpu5MgFV6ZmSWWVrGY25nTehs0nTy4AkAv5mp8VJQtzpKu+fennhQdeb+8aGEaZkFNUOGFAf9ph0G4Lq/gks491Un7cL1/HvcRgPvDdqS+ZRKaPopqK/f978VkpzovlZNJWERZyTrzbgkme6x88zv+rWUu3DiWhldGNuBdghA2kOGhSpSX80gLlj8yE3IP8pdveOq10OztLVpy+8j7tSegOdU9QnBNZ/wqgSVa9kWCU/fui4ASDAA4IAWtthUkaqmDdSPM8mPv8KYueR75LOPKMCCclAOz8S8LK1kFRwcJVEs8= appuser"
-
-runcmd:
-  - wget https://raw.githubusercontent.com/Otus-DevOps-2021-05/Deron-D_infra/cloud-testapp/bootstrap.sh
-  - bash bootstrap.sh
-
-```
-
-Содержимое [bootstrap.sh](./bootstrap.sh):
-```
-#!/bin/bash
-wget -qO - https://www.mongodb.org/static/pgp/server-4.2.asc | sudo apt-key add -
-echo "deb [ arch=amd64,arm64 ] https://repo.mongodb.org/apt/ubuntu xenial/mongodb-org/4.2 multiverse" | sudo tee /etc/apt/sources.list.d/mongodb-org-4.2.list
-sudo apt-get update
-sudo apt-get install -y apt-transport-https ca-certificates ruby-full ruby-bundler build-essential mongodb-org git
-sudo systemctl --now enable mongod
-git clone -b monolith https://github.com/express42/reddit.git
-cd reddit && bundle install
 puma -d
-
 ```
 
+9. Выполнено параметризирование шаблона с применением [variables.json.example](https://raw.githubusercontent.com/Otus-DevOps-2021-05/Deron-D_infra/packer-base/packer/variables.json.example)
+
+10. Построение bake-образа `*`
+- Создан [immutable.json](https://raw.githubusercontent.com/Otus-DevOps-2021-05/Deron-D_infra/packer-base/packer/immutable.json)
+- Создан systemd unit [puma.service](https://raw.githubusercontent.com/Otus-DevOps-2021-05/Deron-D_infra/packer-base/packer/files/puma.service)
+- Запущена сборка
+```
+packer build -var-file=./variables.json immutable.json
+```
+- Проверка созданных образов:
+```
+➜  packer git:(packer-base) yc compute image list
++----------------------+------------------------+-------------+----------------------+--------+
+|          ID          |          NAME          |   FAMILY    |     PRODUCT IDS      | STATUS |
++----------------------+------------------------+-------------+----------------------+--------+
+| fd821hvkilmtrb7tbi2n | reddit-base-1624888205 | reddit-base | f2el9g14ih63bjul3ed3 | READY  |
+| fd8t49b4simvfj6crpta | reddit-full-1624909929 | reddit-full | f2el9g14ih63bjul3ed3 | READY  |
++----------------------+------------------------+-------------+----------------------+--------+
+```
+
+11. Автоматизация создания ВМ `*`
+- Создан [create-reddit-vm.sh](./config-scripts/create-reddit-vm.sh)
+
+
+</details>
 
 ## **Полезное:**
