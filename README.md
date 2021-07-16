@@ -3,8 +3,6 @@
   <summary>Сборка образов VM при помощи Packer</summary>
 
 ## **Задание:**
-<details>
- <summary>Подробнее</summary>
 Подготовка базового образа VM при помощи Packer.
 
 Цель:
@@ -14,13 +12,10 @@
 
 Критерии оценки:
 0 б. - задание не выполнено 1 б. - задание выполнено 2 б. - выполнены все дополнительные задания
-</details>
 
 ---
 
 ## **Выполнено:**
-<details>
- <summary>Подробнее</summary>
 
 1. Установлен Packer:
 ```
@@ -107,8 +102,6 @@ packer build -var-file=./variables.json immutable.json
 11. Автоматизация создания ВМ `*`
 - Создан [create-reddit-vm.sh](./config-scripts/create-reddit-vm.sh)
 
-
-</details>
 
 ## **Полезное:**
 
