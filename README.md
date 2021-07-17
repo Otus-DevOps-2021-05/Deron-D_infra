@@ -446,6 +446,52 @@ packer build -var-file=./variables.json immutable.json
 ---
 
 ## **Выполнено:**
+1. Установлен terraform 0.12.8 с помощью [terraform-switcher](https://github.com/warrensbox/terraform-switcher)
+
+```
+curl -L https://raw.githubusercontent.com/warrensbox/terraform-switcher/release/install.sh | sudo bash
+
+➜  Deron-D_infra git:(terraform-1) ✗ tfswitch
+Use the arrow keys to navigate: ↓ ↑ → ←
+? Select Terraform version:
+  ▸ 0.12.8 *recent
+
+terraform git:(terraform-1) ✗ terraform -v
+Terraform v0.12.8
+```
+
+2. В корне репозитория создали файл [.gitignore](https://github.com/Otus-DevOps-2021-05/Deron-D_infra/blob/terraform-1/.gitignore) с содержимым:
+```
+*.tfstate
+*.tfstate.*.backup
+*.tfstate.backup
+*.tfvars
+.terraform/
+```
+
+3. Узнаем свои параметры токена, идентификатора облака и каталога:
+```
+yc config list
+➜  Deron-D_infra git:(terraform-1) ✗ yc config list
+token: <OAuth или статический ключ сервисного аккаунта>
+cloud-id: <идентификатор облака>
+folder-id: <идентификатор каталога>
+compute-default-zone: ru-central1-a
+```
+4. Создадим сервисный аккаунт для работы terraform:
+
+```
+FOLDER_ID=$(yc config list | grep folder-id | awk '{print $2}')
+SRV_ACC=trfuser
+
+yc iam service-account create --name $SRV_ACC --folder-id $FOLDER_ID
+
+SRV_ACC_ID=$(yc iam service-account get $SRV_ACC | grep ^id | awk '{print $2}')
+
+yc resource-manager folder add-access-binding --id $FOLDER_ID --role editor --service-account-id $SRV_ACC_ID
+
+yc iam key create --service-account-id $SRV_ACC_ID --output ~/.yc_keys/key.json
+```
 
 ## **Полезное:**
 

@@ -1,15 +1,20 @@
+terraform {
+  required_version = "0.12.8"
+}
+
 provider "yandex" {
   version= "0.35"
-  service_account_key_file = var.service_account_key_file
-  cloud_id                 = var.cloud_id
-  folder_id                = var.folder_id
-  zone                     = var.zone
+  service_account_key_file = pathexpand("~/.yc_keys/key.json")
+  #token     = "AQAAAABVxnjdAATuwZZ6Fp8lC0EBlbhiUYTag9A"
+  #cloud_id  = "b1g5qvsnl7ajk0v5ah5i"
+  folder_id = "b1gu87e4thvariradsue"
+  zone = "ru-central1-a"
 }
 
 resource "yandex_compute_instance" "app" {
   name = "reddit-app"
   resources {
-    cores = 1
+    cores = 2
     memory = 2
   }
   boot_disk {
@@ -20,7 +25,7 @@ resource "yandex_compute_instance" "app" {
   }
   network_interface {
   # Указан id подсети default-ru-central1-a
-  subnet_id = "enpv6gbrqnhhbp41jurh"
+  subnet_id = "e9b7qomc4stvbnr6ejde"
   nat = true
   }
 }
