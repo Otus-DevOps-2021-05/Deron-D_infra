@@ -194,7 +194,7 @@ Last login: Sun Jun 20 14:03:20 2021 from 10.129.0.30
 - [SSH: подключение в приватную сеть через Bastion и немного про Multiplexing](https://rtfm.co.ua/ssh-podklyuchenie-v-privatnuyu-set-cherez-bastion-i-nemnogo-pro-multiplexing/)
 </details>
 
-# **Домашнее задание №4: Деплой тестового приложения**
+# **Лекция №6: Деплой тестового приложения**
 <details>
   <summary>Деплой тестового приложения</summary>
 
@@ -220,7 +220,7 @@ testapp_port = 9292
 curl https://storage.yandexcloud.net/yandexcloud-yc/install.sh | bash
 ```
 
-- Создан новый инстанс reddit-app [create_instance.sh][./create_instance.sh]:
+- Создан новый инстанс reddit-app [create_instance.sh](https://github.com/Otus-DevOps-2021-05/Deron-D_infra/blob/main/config-scripts/create_instance.sh):
 ```
 yc compute instance create \
  --name reddit-app \
@@ -232,7 +232,7 @@ yc compute instance create \
  --ssh-key ~/.ssh/appuser.pub
 ```
 
-- Установлен Ruby [install_ruby.sh](.\install_ruby.sh):
+- Установлен Ruby [install_ruby.sh](https://github.com/Otus-DevOps-2021-05/Deron-D_infra/blob/main/config-scripts/install_ruby.sh):
 ```
 sudo apt update
 sudo apt install -y ruby-full ruby-bundler build-essential
@@ -246,7 +246,7 @@ $ bundler -v
 Bundler version 1.11.2
 ```
 
-- Установлен и запущен MongoDB [install_mongodb.sh](./install_mongodb.sh):
+- Установлен и запущен MongoDB [install_mongodb.sh](https://github.com/Otus-DevOps-2021-05/Deron-D_infra/blob/main/config-scripts/install_mongodb.sh):
 ```
 wget -qO - https://www.mongodb.org/static/pgp/server-4.2.asc | sudo apt-key add -
 echo "deb [ arch=amd64,arm64 ] https://repo.mongodb.org/apt/ubuntu xenial/mongodb-org/4.2 multiverse" | sudo tee /etc/apt/sources.list.d/mongodb-org-4.2.list
@@ -261,7 +261,7 @@ sudo systemctl start mongod
 sudo systemctl enable mongod
 ```
 
-- Выполнен деплой приложения [deploy.sh](./deploy.sh):
+- Выполнен деплой приложения [deploy.sh](https://github.com/Otus-DevOps-2021-05/Deron-D_infra/blob/main/config-scripts/deploy.sh):
 ```
 sudo apt-get install -y git
 git clone -b monolith https://github.com/express42/reddit.git
@@ -271,7 +271,7 @@ cd reddit && bundle install
 
 - Дополнительное задание:
 
-Для создания инстанса с развернутым приложением достаточно запустить:
+Для создания инстанса с уже развернутым приложением достаточно запустить:
 ```
 yc compute instance create \
  --name reddit-app \
@@ -283,7 +283,7 @@ yc compute instance create \
  --metadata serial-port-enable=1
 ```
 
-Содержимое [metadata.yaml](./metadata.yaml):
+Содержимое [metadata.yaml](https://github.com/Otus-DevOps-2021-05/Deron-D_infra/blob/main/config-scripts/metadata.yaml):
 ```
 #cloud-config
 users:
@@ -301,7 +301,7 @@ runcmd:
 
 ```
 
-Содержимое [bootstrap.sh](./bootstrap.sh):
+Содержимое [bootstrap.sh](https://github.com/Otus-DevOps-2021-05/Deron-D_infra/blob/main/config-scripts/bootstrap.sh):
 ```
 #!/bin/bash
 wget -qO - https://www.mongodb.org/static/pgp/server-4.2.asc | sudo apt-key add -
