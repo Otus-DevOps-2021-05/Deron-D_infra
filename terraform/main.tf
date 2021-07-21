@@ -5,8 +5,6 @@ terraform {
 provider "yandex" {
   version= "0.35"
   service_account_key_file = pathexpand("~/.yc_keys/key.json")
-  #token     = "AQAAAABVxnjdAATuwZZ6Fp8lC0EBlbhiUYTag9A"
-  #cloud_id  = "b1g5qvsnl7ajk0v5ah5i"
   folder_id = "b1gu87e4thvariradsue"
   zone = "ru-central1-a"
 }
@@ -24,8 +22,11 @@ resource "yandex_compute_instance" "app" {
     }
   }
   network_interface {
-  # Указан id подсети default-ru-central1-a
-  subnet_id = "e9b7qomc4stvbnr6ejde"
-  nat = true
+    # Указан id подсети default-ru-central1-a
+    subnet_id = "e9b7qomc4stvbnr6ejde"
+    nat = true
+  }
+  metadata = {
+    ssh-keys = "ubuntu:${file("~/.ssh/appuser.pub")}"
   }
 }

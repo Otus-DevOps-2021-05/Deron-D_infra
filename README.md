@@ -1,6 +1,6 @@
 # **Лекция №5: Знакомство с облачной инфраструктурой Yandex.Cloud**
 <details>
-  <summary>Сборка образов VM при помощи Packer</summary>
+  <summary>Знакомство с облачной инфраструктурой</summary>
 
 ## **Задание:**
 Запуск VM в Yandex Cloud, управление правилами фаервола, настройка SSH подключения, настройка SSH подключения через Bastion Host, настройка VPN сервера и VPN-подключения.
@@ -446,6 +446,7 @@ packer build -var-file=./variables.json immutable.json
 ---
 
 ## **Выполнено:**
+
 1. Установлен terraform 0.12.8 с помощью [terraform-switcher](https://github.com/warrensbox/terraform-switcher)
 
 ```
@@ -478,8 +479,8 @@ cloud-id: <идентификатор облака>
 folder-id: <идентификатор каталога>
 compute-default-zone: ru-central1-a
 ```
-4. Создадим сервисный аккаунт для работы terraform:
 
+4. Создадим сервисный аккаунт для работы terraform:
 ```
 FOLDER_ID=$(yc config list | grep folder-id | awk '{print $2}')
 SRV_ACC=trfuser
@@ -492,7 +493,132 @@ yc resource-manager folder add-access-binding --id $FOLDER_ID --role editor --se
 
 yc iam key create --service-account-id $SRV_ACC_ID --output ~/.yc_keys/key.json
 ```
+5. Cмотрим информацию о имени, семействе и id пользовательских образов своего каталога с помощью команды yc compute image list:
+```
+➜  Deron-D_infra git:(terraform-1) yc compute image list
++----------------------+------------------------+-------------+----------------------+--------+
+|          ID          |          NAME          |   FAMILY    |     PRODUCT IDS      | STATUS |
++----------------------+------------------------+-------------+----------------------+--------+
+| fd821hvkilmtrb7tbi2n | reddit-base-1624888205 | reddit-base | f2el9g14ih63bjul3ed3 | READY  |
+| fd8t49b4simvfj6crpta | reddit-full-1624909929 | reddit-full | f2el9g14ih63bjul3ed3 | READY  |
++----------------------+------------------------+-------------+----------------------+--------+
+```
+
+6. Cмотрим информацию о имени и id сети своего каталога с помощью команды yc vpc network list:
+```
+➜  Deron-D_infra git:(terraform-1) yc vpc network list
++----------------------+--------+
+|          ID          |  NAME  |
++----------------------+--------+
+| enpv6gbrqnhhbp41jurh | my-net |
++----------------------+--------+
+```
+
+7. Правим main.tf до состояния:
+```
+terraform {
+  required_version = "0.12.8"
+}
+
+provider "yandex" {
+  version= "0.35"
+  service_account_key_file = pathexpand("~/.yc_keys/key.json")
+  folder_id = "b1gu87e4thvariradsue"
+  zone = "ru-central1-a"
+}
+
+resource "yandex_compute_instance" "app" {
+  name = "reddit-app"
+  resources {
+    cores = 2
+    memory = 2
+  }
+  boot_disk {
+    initialize_params {
+    # Указать id образа созданного в предыдущем домашнем задании
+    image_id = "fd821hvkilmtrb7tbi2n"
+    }
+  }
+  network_interface {
+  # Указан id подсети default-ru-central1-a
+  subnet_id = "e9b7qomc4stvbnr6ejde"
+  nat = true
+  }
+}
+```
+
+8. Для того чтобы загрузить провайдер и начать его использовать выполняем следующую команду в
+директории terraform:
+```
+terraform init
+```
+
+9. Планируем изменения:
+```
+terraform plan
+...
+Plan: 1 to add, 0 to change, 0 to destroy.
+
+------------------------------------------------------------------------
+```
+
+10. Создаем VM согласно описанию:
+```
+➜  terraform git:(terraform-1) terraform apply -auto-approve
+yandex_compute_instance.app: Creating...
+yandex_compute_instance.app: Still creating... [10s elapsed]
+yandex_compute_instance.app: Still creating... [20s elapsed]
+yandex_compute_instance.app: Still creating... [30s elapsed]
+yandex_compute_instance.app: Still creating... [40s elapsed]
+yandex_compute_instance.app: Creation complete after 46s [id=fhm2sg90ppv3l27lhudf]
+```
+11. Смотрим внешний IP адрес созданного инстанса,
+```
+terraform git:(terraform-1) ✗ terraform show | grep nat_ip_address
+        nat_ip_address = "84.201.158.45"
+```
+
+12. Пробуем подключиться по SSH:
+```
+terraform git:(terraform-1) ✗ ssh ubuntu@84.201.158.45
+ubuntu@84.201.158.45's password:
+```
+
+13. Нужно определить SSH  публичный ключ пользователя ubuntu в метаданных нашего инстанса добавив в main.tf:
+```
+metadata = {
+ssh-keys = "ubuntu:${file("~/.ssh/appuser.pub")}"
+}
+```
+
+14. Проверяем:
+```
+➜  terraform git:(terraform-1) ✗ ssh ubuntu@178.154.201.37 -i ~/.ssh/appuser -o StrictHostKeyChecking=no
+Warning: Permanently added '178.154.201.37' (ECDSA) to the list of known hosts.
+Welcome to Ubuntu 16.04.7 LTS (GNU/Linux 4.4.0-142-generic x86_64)
+
+ * Documentation:  https://help.ubuntu.com
+ * Management:     https://landscape.canonical.com
+ * Support:        https://ubuntu.com/advantage
+```
+15. Создадим файл outputs.tf для управления выходными переменными с содержимым:
+```
+output "external_ip_address_app" {
+  value = yandex_compute_instance.app.network_interface.0.nat_ip_address
+}
+```
+
+16. Проверяем работоспособность outputs.tf:
+```
+➜  terraform git:(terraform-1) ✗ terraform refresh
+yandex_compute_instance.app: Refreshing state... [id=fhm5o0gooknpnp6v5nmk]
+Outputs:
+external_ip_address_app = 84.201.157.46
+
+➜  terraform git:(terraform-1) ✗ terraform output
+external_ip_address_app = 84.201.157.46
+
+```
 
 ## **Полезное:**
-
 </details>
