@@ -617,8 +617,21 @@ external_ip_address_app = 84.201.157.46
 
 ➜  terraform git:(terraform-1) ✗ terraform output
 external_ip_address_app = 84.201.157.46
-
 ```
+
+17. Добавляем provisioners в main.tf:
+```
+provisioner "file" {
+  source = "files/puma.service"
+  destination = "/tmp/puma.service"
+}
+
+provisioner "remote-exec" {
+script = "files/deploy.sh"
+}
+```
+18. Создадим файл юнита для провижионинга [puma.service](./files/puma.service)
+
 
 ## **Полезное:**
 </details>
