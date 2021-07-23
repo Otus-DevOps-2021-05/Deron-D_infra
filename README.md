@@ -584,7 +584,7 @@ terraform git:(terraform-1) ✗ ssh ubuntu@84.201.158.45
 ubuntu@84.201.158.45's password:
 ```
 
-13. Нужно определить SSH  публичный ключ пользователя ubuntu в метаданных нашего инстанса добавив в main.tf:
+13. Нужно определить SSH публичный ключ пользователя ubuntu в метаданных нашего инстанса добавив в main.tf:
 ```
 metadata = {
 ssh-keys = "ubuntu:${file("~/.ssh/appuser.pub")}"
@@ -632,6 +632,43 @@ script = "files/deploy.sh"
 ```
 18. Создадим файл юнита для провижионинга [puma.service](./files/puma.service)
 
+19. Добавляем секцию для определения паметров подключения привиженеров:
+```
+connection {
+  type = "ssh"
+  host = yandex_compute_instance.app.network_interface.0.nat_ip_address
+  user = "ubuntu"
+  agent = false
+  # путь до приватного ключа
+  private_key = file("~/.ssh/appuser")
+  }
+```
+
+20. Проверяем работу провижинеров:
+```
+➜  terraform git:(terraform-1) ✗ terraform taint yandex_compute_instance.app
+Resource instance yandex_compute_instance.app has been marked as tainted.
+
+➜  terraform git:(terraform-1) ✗ terraform plan
+Refreshing Terraform state in-memory prior to plan...
+The refreshed state will be used to calculate this plan, but will not be
+persisted to local or remote state storage.
+
+yandex_compute_instance.app: Refreshing state... [id=fhm5o0gooknpnp6v5nmk]
+
+------------------------------------------------------------------------
+
+An execution plan has been generated and is shown below.
+Resource actions are indicated with the following symbols:
+-/+ destroy and then create replacement
+
+Terraform will perform the following actions:
+
+  # yandex_compute_instance.app is tainted, so must be replaced
+```
+21.
+```
+```
 
 ## **Полезное:**
 </details>
