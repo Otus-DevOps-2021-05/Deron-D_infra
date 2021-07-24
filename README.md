@@ -644,35 +644,50 @@ connection {
   }
 ```
 
-20. Проверяем работу провижинеров:
+20. Проверяем работу провижинеров. Говорим terraform'y пересоздать ресурс VM при следующем
+применении изменений:
 ```
 ➜  terraform git:(terraform-1) ✗ terraform taint yandex_compute_instance.app
 Resource instance yandex_compute_instance.app has been marked as tainted.
-
-➜  terraform git:(terraform-1) ✗ terraform plan
-Refreshing Terraform state in-memory prior to plan...
-The refreshed state will be used to calculate this plan, but will not be
-persisted to local or remote state storage.
-
-yandex_compute_instance.app: Refreshing state... [id=fhm5o0gooknpnp6v5nmk]
-
-------------------------------------------------------------------------
-
-An execution plan has been generated and is shown below.
-Resource actions are indicated with the following symbols:
--/+ destroy and then create replacement
-
-Terraform will perform the following actions:
-
-  # yandex_compute_instance.app is tainted, so must be replaced
 ```
-21.
+
+21. Планируем и применяем изменения:
 ```
+terraform plan
+terraform apply --auto-approve
 ```
+
+22. Проверяем результат изменений и работу приложения:
+```
+Apply complete! Resources: 1 added, 0 changed, 1 destroyed.
+Outputs:
+external_ip_address_app = 178.154.206.153
+```
+Проверка сервиса по адресу: [http://178.154.206.153:9292/](http://178.154.206.153:9292/)
+
 
 ## **Полезное:**
 - [Создать внутренний сетевой балансировщик](https://cloud.yandex.ru/docs/network-load-balancer/operations/internal-lb-create)
 - [yandex_lb_network_load_balancer](https://registry.terraform.io/providers/yandex-cloud/yandex/0.44.0/docs/resources/lb_network_load_balancer)
 - [yandex_lb_target_group](https://registry.terraform.io/providers/yandex-cloud/yandex/0.44.0/docs/resources/lb_target_group)
+- [dynamic Blocks](https://www.terraform.io/docs/language/expressions/dynamic-blocks.html)
+- [HashiCorp Terraform 0.12 Preview: For and For-Each](https://www.terraform.io/docs/language/expressions/dynamic-blocks.html)
+
+```
+➜  terraform git:(terraform-1) ✗ yc load-balancer network-load-balancer list
++----------------------+---------------+-------------+----------+----------------+------------------------+--------+
+|          ID          |     NAME      |  REGION ID  |   TYPE   | LISTENER COUNT | ATTACHED TARGET GROUPS | STATUS |
++----------------------+---------------+-------------+----------+----------------+------------------------+--------+
+| b7rul6kjivb12lgkrfud | reddit-app-lb | ru-central1 | EXTERNAL |              1 | enp46hq1qjve9id5v9oo   | ACTIVE |
++----------------------+---------------+-------------+----------+----------------+------------------------+--------+
+
+➜  terraform git:(terraform-1) ✗ yc load-balancer target-group list
++----------------------+---------------------+---------------------+-------------+--------------+
+|          ID          |        NAME         |       CREATED       |  REGION ID  | TARGET COUNT |
++----------------------+---------------------+---------------------+-------------+--------------+
+| enp46hq1qjve9id5v9oo | reddit-app-lb-group | 2021-07-24 12:42:52 | ru-central1 |            2 |
++----------------------+---------------------+---------------------+-------------+--------------+
+```
+
 
 </details>
