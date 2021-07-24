@@ -25,3 +25,7 @@ variable service_account_key_file {
 variable private_key_path {
   description = "Path to private key used for ssh access"
 }
+variable region_id {
+  description = "ID of the availability zone where the network load balancer resides"
+  default     = "ru-central1"
+}
