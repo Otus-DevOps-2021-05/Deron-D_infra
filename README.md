@@ -778,18 +778,51 @@ target {
 ```
 - outputs.tf
 ```
-output "external_ip_address_app" {
-  value = yandex_compute_instance.app.network_interface.0.nat_ip_address
-}
 output "external_ip_address_app2" {
   value = yandex_compute_instance.app2.network_interface.0.nat_ip_address
 }
 ```
-##**Проблемы в данной конфигурации:**
+## **Проблемы в данной конфигурации:**
 - Избыточный код
-- На инстансах нет единого бэкэнда в части единой БД (mongodb)
+- На инстансах нет единого бэкэнда в части БД (mongodb)
 
-
+3. Подход с заданием количества инстансов через параметр ресурса count:
+- Добавим  в variables.tf
+```
+variable count_of_instances {
+  description = "Count of instances"
+  default     = 1
+}
+```
+- В main.tf удалим код для reddit-app2 и добавим:
+```
+resource "yandex_compute_instance" "app" {
+  name  = "reddit-app-${count.index}"
+  count = var.count_of_instances
+  resources {
+    cores  = 2
+    memory = 2
+  }
+...
+connection {
+  type  = "ssh"
+  host  = self.network_interface.0.nat_ip_address
+  user  = "ubuntu"
+  agent = false
+  # путь до приватного ключа
+  private_key = file("~/.ssh/appuser")
+}
+```
+- В lb.tf внесем изменения для динамического определения target:
+```
+dynamic "target" {
+  for_each = yandex_compute_instance.app.*.network_interface.0.ip_address
+  content {
+    subnet_id = var.subnet_id
+    address   = target.value
+  }
+}
+```
 
 ## **Полезное:**
 - [Создать внутренний сетевой балансировщик](https://cloud.yandex.ru/docs/network-load-balancer/operations/internal-lb-create)
