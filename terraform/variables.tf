@@ -29,3 +29,7 @@ variable region_id {
   description = "ID of the availability zone where the network load balancer resides"
   default     = "ru-central1"
 }
+variable count_of_instances {
+  description = "Count of instances"
+  default     = 1
+}
