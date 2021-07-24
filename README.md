@@ -630,7 +630,7 @@ provisioner "remote-exec" {
 script = "files/deploy.sh"
 }
 ```
-18. Создадим файл юнита для провижионинга [puma.service](./files/puma.service)
+18. Создадим файл юнита для провижионинга [puma.service](https://github.com/Otus-DevOps-2021-05/Deron-D_infra/blob/terraform-1/terraform/files/puma.service)
 
 19. Добавляем секцию для определения паметров подключения привиженеров:
 ```
@@ -663,7 +663,50 @@ Apply complete! Resources: 1 added, 0 changed, 1 destroyed.
 Outputs:
 external_ip_address_app = 178.154.206.153
 ```
-Проверка сервиса по адресу: [http://178.154.206.153:9292/](http://178.154.206.153:9292/)
+
+23. Параметризируем конфигурационные файлы с помощью входных переменных:
+- Создадим для этих целей еще один конфигурационный файл [variables.tf](https://github.com/Otus-DevOps-2021-05/Deron-D_infra/blob/terraform-1/terraform/variables.tf)
+- Определим соответствующие параметры ресурсов main.tf через переменные:
+```
+provider "yandex" {
+  service_account_key_file = var.service_account_key_file
+  cloud_id = var.cloud_id
+  folder_id = var.folder_id
+  zone = var.zone
+}
+```
+
+```
+boot_disk {
+  initialize_params {
+    # Указать id образа созданного в предыдущем домашем задании
+    image_id = var.image_id
+  }
+}
+
+network_interface {
+  # Указан id подсети default-ru-central1-a
+  subnet_id = var.subnet_id
+  nat       = true
+}
+
+metadata = {
+ssh-keys = "ubuntu:${file(var.public_key_path)}"
+}
+```
+
+24. Определим переменные используя специальный файл [terraform.tfvars](https://github.com/Otus-DevOps-2021-05/Deron-D_infra/blob/terraform-1/terraform/terraform.tfvars.example)
+
+25. Форматирование и финальная проверка:
+```
+terraform fmt
+terraform destroy
+terraform plan
+terraform apply --auto-approve
+```
+## **Проверка сервиса по адресу: [http://178.154.206.153:9292/](http://178.154.206.153:9292/)**
+
+### Создание HTTP балансировщика `**`
 
 
 ## **Полезное:**
