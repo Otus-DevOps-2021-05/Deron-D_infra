@@ -707,6 +707,84 @@ terraform apply --auto-approve
 ## **Проверка сервиса по адресу: [http://178.154.206.153:9292/](http://178.154.206.153:9292/)**
 
 ### Создание HTTP балансировщика `**`
+1. Создадим файл lb.tf со следующим содержимым:
+```
+resource "yandex_lb_target_group" "reddit_lb_target_group" {
+  name      = "reddit-app-lb-group"
+  region_id = var.region_id
+
+  target {
+    subnet_id = var.subnet_id
+    address   = yandex_compute_instance.app.network_interface.0.ip_address
+  }
+}
+
+resource "yandex_lb_network_load_balancer" "load_balancer" {
+  name = "reddit-app-lb"
+
+  listener {
+    name = "reddit-app-listener"
+    port = 80
+    target_port = 9292
+    external_address_spec {
+      ip_version = "ipv4"
+    }
+  }
+
+  attached_target_group {
+    target_group_id = "${yandex_lb_target_group.reddit_lb_target_group.id}"
+
+    healthcheck {
+      name = "http"
+      http_options {
+        port = 9292
+        path = "/"
+      }
+    }
+  }
+}
+```
+2. Добавляем в outputs.tf переменные адреса балансировщика и проверяем работоспособность решения:
+```
+output "loadbalancer_ip_address" {
+  value = yandex_lb_network_load_balancer.load_balancer.listener.*.external_address_spec[0].*.address
+}
+```
+3. Добавляем в код еще один terraform ресурс для нового инстанса приложения (reddit-app2):
+- main.tf
+```
+resource "yandex_compute_instance" "app2" {
+  name = "reddit-app2"
+  resources {
+    cores  = 2
+    memory = 2
+  }
+...
+  connection {
+    type  = "ssh"
+    host  = yandex_compute_instance.app2.network_interface.0.nat_ip_address
+    user  = "ubuntu"
+    agent = false
+    # путь до приватного ключа
+    private_key = file("~/.ssh/appuser")
+  }
+```
+- lb.tf
+```
+target {
+  address = yandex_compute_instance.app2.network_interface.0.ip_address
+  subnet_id = var.subnet_id
+}
+```
+- outputs.tf
+```
+output "external_ip_address_app" {
+  value = yandex_compute_instance.app.network_interface.0.nat_ip_address
+}
+output "external_ip_address_app2" {
+  value = yandex_compute_instance.app2.network_interface.0.nat_ip_address
+}
+```
 
 
 ## **Полезное:**
