@@ -671,4 +671,8 @@ Terraform will perform the following actions:
 ```
 
 ## **Полезное:**
+- [Создать внутренний сетевой балансировщик](https://cloud.yandex.ru/docs/network-load-balancer/operations/internal-lb-create)
+- [yandex_lb_network_load_balancer](https://registry.terraform.io/providers/yandex-cloud/yandex/0.44.0/docs/resources/lb_network_load_balancer)
+- [yandex_lb_target_group](https://registry.terraform.io/providers/yandex-cloud/yandex/0.44.0/docs/resources/lb_target_group)
+
 </details>
