@@ -829,7 +829,7 @@ dynamic "target" {
 - [yandex_lb_network_load_balancer](https://registry.terraform.io/providers/yandex-cloud/yandex/0.44.0/docs/resources/lb_network_load_balancer)
 - [yandex_lb_target_group](https://registry.terraform.io/providers/yandex-cloud/yandex/0.44.0/docs/resources/lb_target_group)
 - [dynamic Blocks](https://www.terraform.io/docs/language/expressions/dynamic-blocks.html)
-- [HashiCorp Terraform 0.12 Preview: For and For-Each](https://www.terraform.io/docs/language/expressions/dynamic-blocks.html)
+- [HashiCorp Terraform 0.12 Preview: For and For-Each](https://www.hashicorp.com/blog/hashicorp-terraform-0-12-preview-for-and-for-each)
 
 ```
 ➜  terraform git:(terraform-1) ✗ yc load-balancer network-load-balancer list
