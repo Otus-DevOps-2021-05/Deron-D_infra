@@ -21,33 +21,28 @@ someinternalhost_IP = 10.129.0.18
 1. Создаем инстансы VM bastion и someinternalhost через веб-морду Yandex.Cloud
 
 2. Генерим пару ключей
-```
+```bash
 ssh-keygen -t rsa -f ~/.ssh/appuser -C appuser -P ""
 ```
 
 3. Проверяем подключение по полученному внешнему адресу
-```
+```bash
 ssh -i ~/.ssh/appuser appuser@84.252.136.193
 The authenticity of host '84.252.136.193 (84.252.136.193)' can't be established.
 ECDSA key fingerprint is SHA256:mbIKmLTZYygwUXSfTBJ8E017RPU9kNESKHYfdoDWbXY.
 Are you sure you want to continue connecting (yes/no/[fingerprint])? yes
 Warning: Permanently added '84.252.136.193' (ECDSA) to the list of known hosts.
 Welcome to Ubuntu 20.04.2 LTS (GNU/Linux 5.4.0-42-generic x86_64)
-
  * Documentation:  https://help.ubuntu.com
  * Management:     https://landscape.canonical.com
  * Support:        https://ubuntu.com/advantage
-
 The programs included with the Ubuntu system are free software;
 the exact distribution terms for each program are described in the
 individual files in /usr/share/doc/*/copyright.
-
 Ubuntu comes with ABSOLUTELY NO WARRANTY, to the extent permitted by
 applicable law.
-
 dpp@h470m ~/otus-devops/Deron-D_infra $ ssh -i ~/.ssh/appuser appuser@84.252.136.193
 Welcome to Ubuntu 20.04.2 LTS (GNU/Linux 5.4.0-42-generic x86_64)
-
  * Documentation:  https://help.ubuntu.com
  * Management:     https://landscape.canonical.com
  * Support:        https://ubuntu.com/advantage
@@ -62,45 +57,38 @@ appuser@10.129.0.18: Permission denied (publickey).
 
 4. Используем Bastion host для прямого подключения к инстансам внутренней сети:
 - Настроим SSH Forwarding на нашей локальной машине:
-```
+```bash
  ~/otus-devops/Deron-D_infra $ eval $(ssh-agent -s)
 Agent pid 1739595
 ```
 - Добавим приватный ключ в ssh агент авторизации:
-```
+```bash
 ~/otus-devops/Deron-D_infra $ ssh-add ~/.ssh/appuser
 Identity added: /home/dpp/.ssh/appuser (appuser)
 ```
 
 - Проверяем прямое подключение:
-```
+```bash
 ssh -i ~/.ssh/appuser -A appuser@84.252.136.193
 Welcome to Ubuntu 20.04.2 LTS (GNU/Linux 5.4.0-42-generic x86_64)
-
  * Documentation:  https://help.ubuntu.com
  * Management:     https://landscape.canonical.com
  * Support:        https://ubuntu.com/advantage
 Last login: Sun Jun 20 13:22:54 2021 from 82.194.224.170
 appuser@bastion:~$ ssh 10.129.0.18
 Welcome to Ubuntu 20.04.2 LTS (GNU/Linux 5.4.0-42-generic x86_64)
-
  * Documentation:  https://help.ubuntu.com
  * Management:     https://landscape.canonical.com
  * Support:        https://ubuntu.com/advantage
-
 The programs included with the Ubuntu system are free software;
 the exact distribution terms for each program are described in the
 individual files in /usr/share/doc/*/copyright.
-
 Ubuntu comes with ABSOLUTELY NO WARRANTY, to the extent permitted by
 applicable law.
-
 appuser@someinternalhost:~$ uname -n
 someinternalhost
-
 appuser@someinternalhost:~$ uname -a
 Linux someinternalhost 5.4.0-42-generic #46-Ubuntu SMP Fri Jul 10 00:24:02 UTC 2020 x86_64 x86_64 x86_64 GNU/Linux
-
 appuser@someinternalhost:~$ ip a show eth0
 2: eth0: <BROADCAST,MULTICAST,UP,LOWER_UP> mtu 1500 qdisc mq state UP group default qlen 1000
     link/ether d0:0d:e1:f3:67:f3 brd ff:ff:ff:ff:ff:ff
@@ -111,7 +99,7 @@ appuser@someinternalhost:~$ ip a show eth0
 ```
 
 - Проверим отсутствие каких-либо приватных ключей на bastion машине:
-```
+```bash
 appuser@bastion:~$ ls -la ~/.ssh/
 total 16
 drwx------ 2 appuser appuser 4096 Jun 20 13:19 .
@@ -123,7 +111,7 @@ drwxr-xr-x 4 appuser appuser 4096 Jun 20 13:12 ..
 - Самостоятельное задание. Исследовать способ подключения к someinternalhost в одну команду из вашего рабочего устройства:
 
 Добавим в ~/.ssh/config содержимое:
-```
+```bash
 dpp@h470m ~/otus-devops/Deron-D_infra $ cat ~/.ssh/config
 Host 84.252.136.193
   User appuser
@@ -135,31 +123,29 @@ Host 10.129.0.18
 ```
 
 Проверяем работоспособность найденного решения:
-```
+```bash
 ~/otus-devops/Deron-D_infra $ ssh 10.129.0.18
 The authenticity of host '10.129.0.18 (<no hostip for proxy command>)' can't be established.
 ECDSA key fingerprint is SHA256:WsrgIfB+b7qerWOk1tNLqeyGmKoBfKdWkdVJKVzo6u8.
 Are you sure you want to continue connecting (yes/no/[fingerprint])? yes
 Warning: Permanently added '10.129.0.18' (ECDSA) to the list of known hosts.
 Welcome to Ubuntu 20.04.2 LTS (GNU/Linux 5.4.0-42-generic x86_64)
-
  * Documentation:  https://help.ubuntu.com
  * Management:     https://landscape.canonical.com
  * Support:        https://ubuntu.com/advantage
 Failed to connect to https://changelogs.ubuntu.com/meta-release-lts. Check your Internet connection or proxy settings
-
 Last login: Sun Jun 20 13:24:16 2021 from 10.129.0.30
-
 ```
+
 - Дополнительное задание:
 
 На локальной машине правим /etc/hosts
-```
+```bash
 sudo bash -c 'echo "10.129.0.18 someinternalhost" >> /etc/hosts'
 ```
 
 Добавим в ~/.ssh/config содержимое:
-```
+```bash
 Host someinternalhost
   User appuser
   ProxyCommand ssh -W %h:%p 84.252.136.193
@@ -174,12 +160,10 @@ ECDSA key fingerprint is SHA256:WsrgIfB+b7qerWOk1tNLqeyGmKoBfKdWkdVJKVzo6u8.
 Are you sure you want to continue connecting (yes/no/[fingerprint])? yes
 Warning: Permanently added 'someinternalhost' (ECDSA) to the list of known hosts.
 Welcome to Ubuntu 20.04.2 LTS (GNU/Linux 5.4.0-42-generic x86_64)
-
  * Documentation:  https://help.ubuntu.com
  * Management:     https://landscape.canonical.com
  * Support:        https://ubuntu.com/advantage
 Failed to connect to https://changelogs.ubuntu.com/meta-release-lts. Check your Internet connection or proxy settings
-
 Last login: Sun Jun 20 14:03:20 2021 from 10.129.0.30
 ```
 
@@ -216,12 +200,13 @@ testapp_port = 9292
 ## **Выполнено:**
 
 - Установлен YC CLI:
-```
+```bash
 curl https://storage.yandexcloud.net/yandexcloud-yc/install.sh | bash
 ```
 
 - Создан новый инстанс reddit-app [create_instance.sh](https://github.com/Otus-DevOps-2021-05/Deron-D_infra/blob/main/config-scripts/create_instance.sh):
-```
+
+```bash
 yc compute instance create \
  --name reddit-app \
  --hostname reddit-app \
@@ -233,13 +218,13 @@ yc compute instance create \
 ```
 
 - Установлен Ruby [install_ruby.sh](https://github.com/Otus-DevOps-2021-05/Deron-D_infra/blob/main/config-scripts/install_ruby.sh):
-```
+```bash
 sudo apt update
 sudo apt install -y ruby-full ruby-bundler build-essential
 ```
 
 - Проверен Ruby и Bundler:
-```
+```bash
 $ ruby -v
 ruby 2.3.1p112 (2016-04-26) [x86_64-linux-gnu]
 $ bundler -v
@@ -247,32 +232,34 @@ Bundler version 1.11.2
 ```
 
 - Установлен и запущен MongoDB [install_mongodb.sh](https://github.com/Otus-DevOps-2021-05/Deron-D_infra/blob/main/config-scripts/install_mongodb.sh):
-```
+```bash
 wget -qO - https://www.mongodb.org/static/pgp/server-4.2.asc | sudo apt-key add -
 echo "deb [ arch=amd64,arm64 ] https://repo.mongodb.org/apt/ubuntu xenial/mongodb-org/4.2 multiverse" | sudo tee /etc/apt/sources.list.d/mongodb-org-4.2.list
-
+```
+```bash
 sudo apt-get update
 sudo apt-get install -y apt-transport-https ca-certificates
-
+```
+```bash
 sudo apt-get update
 sudo apt-get install -y mongodb-org
-
+```
+```bash
 sudo systemctl start mongod
 sudo systemctl enable mongod
 ```
 
 - Выполнен деплой приложения [deploy.sh](https://github.com/Otus-DevOps-2021-05/Deron-D_infra/blob/main/config-scripts/deploy.sh):
-```
+```bash
 sudo apt-get install -y git
 git clone -b monolith https://github.com/express42/reddit.git
 cd reddit && bundle install
-
 ```
 
 - Дополнительное задание:
 
 Для создания инстанса с уже развернутым приложением достаточно запустить:
-```
+```bash
 yc compute instance create \
  --name reddit-app \
  --hostname reddit-app \
@@ -284,7 +271,7 @@ yc compute instance create \
 ```
 
 Содержимое [metadata.yaml](https://github.com/Otus-DevOps-2021-05/Deron-D_infra/blob/main/config-scripts/metadata.yaml):
-```
+```yaml
 #cloud-config
 users:
   - default
@@ -302,7 +289,7 @@ runcmd:
 ```
 
 Содержимое [bootstrap.sh](https://github.com/Otus-DevOps-2021-05/Deron-D_infra/blob/main/config-scripts/bootstrap.sh):
-```
+```bash
 #!/bin/bash
 wget -qO - https://www.mongodb.org/static/pgp/server-4.2.asc | sudo apt-key add -
 echo "deb [ arch=amd64,arm64 ] https://repo.mongodb.org/apt/ubuntu xenial/mongodb-org/4.2 multiverse" | sudo tee /etc/apt/sources.list.d/mongodb-org-4.2.list
@@ -312,7 +299,6 @@ sudo systemctl --now enable mongod
 git clone -b monolith https://github.com/express42/reddit.git
 cd reddit && bundle install
 puma -d
-
 ```
 
 ## **Полезное:**
@@ -408,16 +394,20 @@ puma -d
 ```
 packer build -var-file=./variables.json immutable.json
 ```
+
 - Проверка созданных образов:
-```
-➜  packer git:(packer-base) yc compute image list
+~~~bash
+packer git:(packer-base) yc compute image list
+~~~
+
+~~~
 +----------------------+------------------------+-------------+----------------------+--------+
 |          ID          |          NAME          |   FAMILY    |     PRODUCT IDS      | STATUS |
 +----------------------+------------------------+-------------+----------------------+--------+
 | fd821hvkilmtrb7tbi2n | reddit-base-1624888205 | reddit-base | f2el9g14ih63bjul3ed3 | READY  |
 | fd8t49b4simvfj6crpta | reddit-full-1624909929 | reddit-full | f2el9g14ih63bjul3ed3 | READY  |
 +----------------------+------------------------+-------------+----------------------+--------+
-```
+~~~
 
 11. Автоматизация создания ВМ `*`
 - Создан [create-reddit-vm.sh](./config-scripts/create-reddit-vm.sh)
@@ -462,6 +452,7 @@ Terraform v0.12.8
 ```
 
 2. В корне репозитория создали файл [.gitignore](https://github.com/Otus-DevOps-2021-05/Deron-D_infra/blob/terraform-1/.gitignore) с содержимым:
+
 ```
 *.tfstate
 *.tfstate.*.backup
@@ -471,7 +462,7 @@ Terraform v0.12.8
 ```
 
 3. Узнаем свои параметры токена, идентификатора облака и каталога:
-```
+```bash
 yc config list
 ➜  Deron-D_infra git:(terraform-1) ✗ yc config list
 token: <OAuth или статический ключ сервисного аккаунта>
@@ -481,41 +472,41 @@ compute-default-zone: ru-central1-a
 ```
 
 4. Создадим сервисный аккаунт для работы terraform:
-```
+~~~bash
 FOLDER_ID=$(yc config list | grep folder-id | awk '{print $2}')
 SRV_ACC=trfuser
-
 yc iam service-account create --name $SRV_ACC --folder-id $FOLDER_ID
-
 SRV_ACC_ID=$(yc iam service-account get $SRV_ACC | grep ^id | awk '{print $2}')
-
 yc resource-manager folder add-access-binding --id $FOLDER_ID --role editor --service-account-id $SRV_ACC_ID
-
 yc iam key create --service-account-id $SRV_ACC_ID --output ~/.yc_keys/key.json
-```
+~~~
+
 5. Cмотрим информацию о имени, семействе и id пользовательских образов своего каталога с помощью команды yc compute image list:
-```
-➜  Deron-D_infra git:(terraform-1) yc compute image list
+
+~~~
+Deron-D_infra git:(terraform-1) yc compute image list
 +----------------------+------------------------+-------------+----------------------+--------+
 |          ID          |          NAME          |   FAMILY    |     PRODUCT IDS      | STATUS |
 +----------------------+------------------------+-------------+----------------------+--------+
 | fd821hvkilmtrb7tbi2n | reddit-base-1624888205 | reddit-base | f2el9g14ih63bjul3ed3 | READY  |
 | fd8t49b4simvfj6crpta | reddit-full-1624909929 | reddit-full | f2el9g14ih63bjul3ed3 | READY  |
 +----------------------+------------------------+-------------+----------------------+--------+
-```
+~~~
 
 6. Cмотрим информацию о имени и id сети своего каталога с помощью команды yc vpc network list:
-```
-➜  Deron-D_infra git:(terraform-1) yc vpc network list
+
+~~~
+Deron-D_infra git:(terraform-1) yc vpc network list
 +----------------------+--------+
 |          ID          |  NAME  |
 +----------------------+--------+
 | enpv6gbrqnhhbp41jurh | my-net |
 +----------------------+--------+
-```
+~~~
 
 7. Правим main.tf до состояния:
-```
+
+```hcl
 terraform {
   required_version = "0.12.8"
 }
@@ -549,21 +540,23 @@ resource "yandex_compute_instance" "app" {
 
 8. Для того чтобы загрузить провайдер и начать его использовать выполняем следующую команду в
 директории terraform:
-```
+
+```bash
 terraform init
 ```
 
 9. Планируем изменения:
-```
+
+```bash
 terraform plan
 ...
 Plan: 1 to add, 0 to change, 0 to destroy.
-
 ------------------------------------------------------------------------
 ```
 
 10. Создаем VM согласно описанию:
-```
+
+```bash
 ➜  terraform git:(terraform-1) terraform apply -auto-approve
 yandex_compute_instance.app: Creating...
 yandex_compute_instance.app: Still creating... [10s elapsed]
@@ -572,27 +565,32 @@ yandex_compute_instance.app: Still creating... [30s elapsed]
 yandex_compute_instance.app: Still creating... [40s elapsed]
 yandex_compute_instance.app: Creation complete after 46s [id=fhm2sg90ppv3l27lhudf]
 ```
+
 11. Смотрим внешний IP адрес созданного инстанса,
-```
+
+```bash
 terraform git:(terraform-1) ✗ terraform show | grep nat_ip_address
         nat_ip_address = "84.201.158.45"
 ```
 
 12. Пробуем подключиться по SSH:
-```
+
+```bash
 terraform git:(terraform-1) ✗ ssh ubuntu@84.201.158.45
 ubuntu@84.201.158.45's password:
 ```
 
 13. Нужно определить SSH публичный ключ пользователя ubuntu в метаданных нашего инстанса добавив в main.tf:
-```
+
+```hcl
 metadata = {
 ssh-keys = "ubuntu:${file("~/.ssh/appuser.pub")}"
 }
 ```
 
 14. Проверяем:
-```
+
+```bash
 ➜  terraform git:(terraform-1) ✗ ssh ubuntu@178.154.201.37 -i ~/.ssh/appuser -o StrictHostKeyChecking=no
 Warning: Permanently added '178.154.201.37' (ECDSA) to the list of known hosts.
 Welcome to Ubuntu 16.04.7 LTS (GNU/Linux 4.4.0-142-generic x86_64)
@@ -601,15 +599,18 @@ Welcome to Ubuntu 16.04.7 LTS (GNU/Linux 4.4.0-142-generic x86_64)
  * Management:     https://landscape.canonical.com
  * Support:        https://ubuntu.com/advantage
 ```
+
 15. Создадим файл outputs.tf для управления выходными переменными с содержимым:
-```
+
+```hcl
 output "external_ip_address_app" {
   value = yandex_compute_instance.app.network_interface.0.nat_ip_address
 }
 ```
 
 16. Проверяем работоспособность outputs.tf:
-```
+
+```bash
 ➜  terraform git:(terraform-1) ✗ terraform refresh
 yandex_compute_instance.app: Refreshing state... [id=fhm5o0gooknpnp6v5nmk]
 Outputs:
@@ -620,7 +621,8 @@ external_ip_address_app = 84.201.157.46
 ```
 
 17. Добавляем provisioners в main.tf:
-```
+
+```hcl
 provisioner "file" {
   source = "files/puma.service"
   destination = "/tmp/puma.service"
@@ -630,10 +632,12 @@ provisioner "remote-exec" {
 script = "files/deploy.sh"
 }
 ```
+
 18. Создадим файл юнита для провижионинга [puma.service](https://github.com/Otus-DevOps-2021-05/Deron-D_infra/blob/terraform-1/terraform/files/puma.service)
 
 19. Добавляем секцию для определения паметров подключения привиженеров:
-```
+
+```hcl
 connection {
   type = "ssh"
   host = yandex_compute_instance.app.network_interface.0.nat_ip_address
@@ -646,19 +650,22 @@ connection {
 
 20. Проверяем работу провижинеров. Говорим terraform'y пересоздать ресурс VM при следующем
 применении изменений:
-```
+
+```bash
 ➜  terraform git:(terraform-1) ✗ terraform taint yandex_compute_instance.app
 Resource instance yandex_compute_instance.app has been marked as tainted.
 ```
 
 21. Планируем и применяем изменения:
-```
+
+```bash
 terraform plan
 terraform apply --auto-approve
 ```
 
 22. Проверяем результат изменений и работу приложения:
-```
+
+```bash
 Apply complete! Resources: 1 added, 0 changed, 1 destroyed.
 Outputs:
 external_ip_address_app = 178.154.206.153
@@ -667,7 +674,8 @@ external_ip_address_app = 178.154.206.153
 23. Параметризируем конфигурационные файлы с помощью входных переменных:
 - Создадим для этих целей еще один конфигурационный файл [variables.tf](https://github.com/Otus-DevOps-2021-05/Deron-D_infra/blob/terraform-1/terraform/variables.tf)
 - Определим соответствующие параметры ресурсов main.tf через переменные:
-```
+
+```hcl
 provider "yandex" {
   service_account_key_file = var.service_account_key_file
   cloud_id = var.cloud_id
@@ -676,7 +684,7 @@ provider "yandex" {
 }
 ```
 
-```
+```hcl
 boot_disk {
   initialize_params {
     # Указать id образа созданного в предыдущем домашем задании
@@ -698,17 +706,20 @@ ssh-keys = "ubuntu:${file(var.public_key_path)}"
 24. Определим переменные используя специальный файл [terraform.tfvars](https://github.com/Otus-DevOps-2021-05/Deron-D_infra/blob/terraform-1/terraform/terraform.tfvars.example)
 
 25. Форматирование и финальная проверка:
-```
+
+```bash
 terraform fmt
 terraform destroy
 terraform plan
 terraform apply --auto-approve
 ```
+
 ## **Проверка сервиса по адресу: [http://178.154.206.153:9292/](http://178.154.206.153:9292/)**
 
 ### Создание HTTP балансировщика `**`
 1. Создадим файл lb.tf со следующим содержимым:
-```
+
+```hcl
 resource "yandex_lb_target_group" "reddit_lb_target_group" {
   name      = "reddit-app-lb-group"
   region_id = var.region_id
@@ -744,15 +755,19 @@ resource "yandex_lb_network_load_balancer" "load_balancer" {
   }
 }
 ```
+
 2. Добавляем в outputs.tf переменные адреса балансировщика и проверяем работоспособность решения:
-```
+
+```hcl
 output "loadbalancer_ip_address" {
   value = yandex_lb_network_load_balancer.load_balancer.listener.*.external_address_spec[0].*.address
 }
 ```
+
 3. Добавляем в код еще один terraform ресурс для нового инстанса приложения (reddit-app2):
 - main.tf
-```
+
+```hcl
 resource "yandex_compute_instance" "app2" {
   name = "reddit-app2"
   resources {
@@ -769,33 +784,41 @@ resource "yandex_compute_instance" "app2" {
     private_key = file("~/.ssh/appuser")
   }
 ```
+
 - lb.tf
-```
+
+```hcl
 target {
   address = yandex_compute_instance.app2.network_interface.0.ip_address
   subnet_id = var.subnet_id
 }
 ```
+
 - outputs.tf
-```
+
+```hcl
 output "external_ip_address_app2" {
   value = yandex_compute_instance.app2.network_interface.0.nat_ip_address
 }
 ```
+
 ## **Проблемы в данной конфигурации:**
 - Избыточный код
 - На инстансах нет единого бэкэнда в части БД (mongodb)
 
 3. Подход с заданием количества инстансов через параметр ресурса count:
 - Добавим  в variables.tf
-```
+
+```hcl
 variable count_of_instances {
   description = "Count of instances"
   default     = 1
 }
 ```
+
 - В main.tf удалим код для reddit-app2 и добавим:
-```
+
+```hcl
 resource "yandex_compute_instance" "app" {
   name  = "reddit-app-${count.index}"
   count = var.count_of_instances
@@ -813,8 +836,9 @@ connection {
   private_key = file("~/.ssh/appuser")
 }
 ```
+
 - В lb.tf внесем изменения для динамического определения target:
-```
+```hcl
 dynamic "target" {
   for_each = yandex_compute_instance.app.*.network_interface.0.ip_address
   content {
@@ -831,7 +855,7 @@ dynamic "target" {
 - [dynamic Blocks](https://www.terraform.io/docs/language/expressions/dynamic-blocks.html)
 - [HashiCorp Terraform 0.12 Preview: For and For-Each](https://www.hashicorp.com/blog/hashicorp-terraform-0-12-preview-for-and-for-each)
 
-```
+```bash
 ➜  terraform git:(terraform-1) ✗ yc load-balancer network-load-balancer list
 +----------------------+---------------+-------------+----------+----------------+------------------------+--------+
 |          ID          |     NAME      |  REGION ID  |   TYPE   | LISTENER COUNT | ATTACHED TARGET GROUPS | STATUS |
@@ -846,6 +870,27 @@ dynamic "target" {
 | enp46hq1qjve9id5v9oo | reddit-app-lb-group | 2021-07-24 12:42:52 | ru-central1 |            2 |
 +----------------------+---------------------+---------------------+-------------+--------------+
 ```
+</details>
+
+# **Лекция №9: Принципы организации инфраструктурного кода и работа над инфраструктурой в команде на примере Terraform**
+<details>
+  <summary>Создание Terraform модулей для управления компонентами инфраструктуры.</summary>
 
 
+## **Задание:**
+Создание Terraform модулей для управления компонентами инфраструктуры.
+
+Цель:
+В данном дз студент продолжит работать с Terraform. Опишет и произведет настройку нескольких окружений при помощи Terraform. Настроит remote backend. В данном задании тренируются навыки: работы с Terraform, использования внешних хранилищ состояния инфраструктуры.
+
+Описание и настройка инфраструктуры нескольких окружений. Работа с Terraform remote backend.
+
+Критерии оценки:
+0 б. - задание не выполнено 1 б. - задание выполнено 2 б. выполнены все дополнительные задания
+
+---
+
+## **Выполнено:**
+
+## **Полезное:**
 </details>
