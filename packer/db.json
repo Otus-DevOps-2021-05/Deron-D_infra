@@ -2,7 +2,7 @@
     "builders": [
         {
             "type": "yandex",
-            "image_name": "reddit-db-base-{{timestamp}}",
+            "image_name": "reddit-db-base",
             "image_family": "reddit-db-base",
             "ssh_username": "ubuntu",
             "platform_id": "standard-v2",
