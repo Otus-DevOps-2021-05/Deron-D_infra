@@ -55,6 +55,8 @@ resource "yandex_compute_instance" "app" {
   provisioner "remote-exec" {
     script = "files/deploy.sh"
   }
+
+  depends_on = [ yandex_vpc_subnet.app-subnet ]
 }
 
 resource "yandex_vpc_network" "app-network" {
@@ -63,7 +65,7 @@ resource "yandex_vpc_network" "app-network" {
 
 resource "yandex_vpc_subnet" "app-subnet" {
   name           = "reddit-app-subnet"
-  zone           = "ru-central1-a"
+  zone           = var.zone
   network_id     = "${yandex_vpc_network.app-network.id}"
   v4_cidr_blocks = ["192.168.10.0/24"]
 }
