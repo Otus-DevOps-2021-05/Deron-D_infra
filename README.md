@@ -1,4 +1,5 @@
 # **Лекция №5: Знакомство с облачной инфраструктурой Yandex.Cloud**
+> _cloud-bastion_
 <details>
   <summary>Знакомство с облачной инфраструктурой</summary>
 
@@ -179,6 +180,7 @@ Last login: Sun Jun 20 14:03:20 2021 from 10.129.0.30
 </details>
 
 # **Лекция №6: Деплой тестового приложения**
+> _cloud-testapp_
 <details>
   <summary>Деплой тестового приложения</summary>
 
@@ -305,6 +307,7 @@ puma -d
 </details>
 
 # **Лекция №7: Сборка образов VM при помощи Packer**
+> _packer-base_
 <details>
   <summary>Сборка образов VM при помощи Packer</summary>
 
@@ -419,6 +422,7 @@ packer git:(packer-base) yc compute image list
 
 
 # **Лекция №8: Знакомство с terraform**
+> _terraform-1_
 <details>
   <summary>Знакомство с terraform</summary>
 
@@ -873,6 +877,7 @@ dynamic "target" {
 </details>
 
 # **Лекция №9: Принципы организации инфраструктурного кода и работа над инфраструктурой в команде на примере Terraform**
+> _terraform-2_
 <details>
   <summary>Создание Terraform модулей для управления компонентами инфраструктуры.</summary>
 
