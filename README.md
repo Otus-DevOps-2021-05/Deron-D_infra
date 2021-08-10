@@ -897,7 +897,53 @@ dynamic "target" {
 
 ## **Выполнено:**
 
-1.
+1. Создаем новую ветку в инфраструктурном репозитории и подчищаем результаты заданий со ⭐:
+
+```bash
+git checkout -b terraform-2
+git mv terraform/lb.tf terraform/files/
+```
+2. Зададим IP для инстанса с приложением в виде внешнего ресурса, добавив в 'main.tf':
+
+```hcl
+resource "yandex_vpc_network" "app-network" {
+  name = "reddit-app-network"
+}
+resource "yandex_vpc_subnet" "app-subnet" {
+  name           = "reddit-app-subnet"
+  zone           = "ru-central1-a"
+  network_id     = "${yandex_vpc_network.app-network.id}"
+  v4_cidr_blocks = ["192.168.10.0/24"]
+}
+```
+- также добавим в 'main.tf' ссылку на внешний ресурс:
+
+```hcl
+network_interface {
+  subnet_id = yandex_vpc_subnet.app-subnet.id
+  nat = true
+}
+```
+
+3. Применим изменения
+```bash
+terraform destroy
+terraform apply
+yandex_vpc_network.app-network: Creating...
+yandex_vpc_network.app-network: Creation complete after 5s
+yandex_vpc_subnet.app-subnet: Creating...
+yandex_vpc_subnet.app-subnet: Creation complete after 5s
+yandex_compute_instance.app: Creating...
+```
+Видим, что ресурс VM начал создаваться только после
+завершения создания yandex_vpc_subnet в результате неявной зависимости этих ресурсов.
+
+4. Создание раздельных образов для инстансов app и db с помощью Packer:
+
+В директории packer, где содержатся ваши шаблоны для билда VM, создадим два новых шаблона [db.json](https://github.com/Otus-DevOps-2021-05/Deron-D_infra/blob/terraform-2/packer/db.json) и [app.json](https://github.com/Otus-DevOps-2021-05/Deron-D_infra/blob/terraform-2/packer/app.json).
+
+В качестве базового шаблона используем уже имеющийся шаблон ubuntu16.json, корректирую только соответствующие наименования образов и секции провизионеров.
+
 
 ## **Полезное:**
 </details>
