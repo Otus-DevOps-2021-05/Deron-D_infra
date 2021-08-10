@@ -1261,5 +1261,65 @@ module "db" {
 }
 ~~~
 
+Для использования модулей нужно сначала их загрузить из указанного источника `source`:
+~~~bash
+terraform get
+~~~
+
+Из папки terraform удаляем уже ненужные файлы app.tf, db.tf, vpc.tf и изменяем `outputs.tf`:
+~~~hcl
+output "external_ip_address_app" {
+  value = module.app.external_ip_address_app
+}
+output "external_ip_address_db" {
+  value = module.db.external_ip_address_db
+}
+~~~
+
+Планируем изменения:
+~~~bash
+terraform plan
+Refreshing Terraform state in-memory prior to plan...
+The refreshed state will be used to calculate this plan, but will not be
+persisted to local or remote state storage.
+Plan: 2 to add, 0 to change, 0 to destroy.
+------------------------------------------------------------------------
+Note: You didn't specify an "-out" parameter to save this plan, so Terraform
+can't guarantee that exactly these actions will be performed if
+"terraform apply" is subsequently run.
+~~~
+После применения конфигурации с помощью terraform apply в соответствии с нашей конфигурацией проверяем SSH доступ ко обоим инстансам
+Проверим доступность по SSH:
+~~~bash
+➜  terraform git:(terraform-2) ✗ ssh ubuntu@178.154.220.171 -i ~/.ssh/appuser
+➜  terraform git:(terraform-2) ✗ ssh ubuntu@178.154.200.211 -i ~/.ssh/appuser
+~~~
+
+7. Переиспользование модулей
+В директории terrafrom создадим две директории: stage и prod. Скопируем  файлы main.tf, variables.tf, outputs.tf, terraform.tfvars, key.json из директории terraform в каждую из созданных директорий.
+
+Поменяем пути к модулям в main.tf на ../modules/xxx вместо ./modules/xxx в папках stage и prod.
+
+Проверим правильность настроек инфраструктуры каждого окружения:
+~~~bash
+cd stage
+terraform init
+terraform plan
+terraform apply --auto-approve
+terraform destroy --auto-approve
+
+cd ../prod
+terraform init
+terraform plan
+terraform apply --auto-approve
+terraform destroy --auto-approve
+~~~
+
+Отформатируем конфигурационные файлы, используя команду `terraform fmt`
+
+
 ## **Полезное:**
+
+[Публичный от HashiCorp реестр модулей для terraform](https://registry.terraform.io/)
+
 </details>

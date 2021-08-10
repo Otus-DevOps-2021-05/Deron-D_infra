@@ -37,13 +37,14 @@ resource "yandex_compute_instance" "app" {
     preemptible = true
   }
 
-  provisioner "file" {
-    source      = "files/puma.service"
-    destination = "/tmp/puma.service"
-  }
-
-  provisioner "remote-exec" {
-    script = "files/deploy.sh"
-  }
-
+#   provisioner "file" {
+#     source      = "files/puma.service"
+#     destination = "/tmp/puma.service"
+#   }
+#
+#   provisioner "remote-exec" {
+#     script = "files/deploy.sh"
+#   }
+#
+#
 }

@@ -15,16 +15,16 @@ data "yandex_compute_image" "db_image" {
 }
 
 module "app" {
-  source          = "./modules/app"
-  public_key_path = var.public_key_path
+  source           = "../modules/app"
+  public_key_path  = var.public_key_path
   private_key_path = var.private_key_path
-  app_disk_image  = "${data.yandex_compute_image.app_image.id}"
-  subnet_id       = var.subnet_id
+  app_disk_image   = "${data.yandex_compute_image.app_image.id}"
+  subnet_id        = var.subnet_id
 }
 module "db" {
-  source          = "./modules/db"
-  public_key_path = var.public_key_path
+  source           = "../modules/db"
+  public_key_path  = var.public_key_path
   private_key_path = var.private_key_path
-  db_disk_image   = "${data.yandex_compute_image.db_image.id}"
-  subnet_id       = var.subnet_id
+  db_disk_image    = "${data.yandex_compute_image.db_image.id}"
+  subnet_id        = var.subnet_id
 }
