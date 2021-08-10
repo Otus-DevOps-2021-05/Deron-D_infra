@@ -942,8 +942,87 @@ yandex_compute_instance.app: Creating...
 
 В директории packer, где содержатся ваши шаблоны для билда VM, создадим два новых шаблона [db.json](https://github.com/Otus-DevOps-2021-05/Deron-D_infra/blob/terraform-2/packer/db.json) и [app.json](https://github.com/Otus-DevOps-2021-05/Deron-D_infra/blob/terraform-2/packer/app.json).
 
-В качестве базового шаблона используем уже имеющийся шаблон ubuntu16.json, корректирую только соответствующие наименования образов и секции провизионеров.
+В качестве базового шаблона используем уже имеющийся шаблон ubuntu16.json, корректирую только соответствующие секции с наименованиями образов и секциями провизионеров.
 
+5. Создадим две VM
+Разобьем конфиг main.tf на несколько конфигов
+Создадим файл 'app.tf', куда вынесем конфигурацию для VM с приложением:
+~~~hcl
+resource "yandex_compute_instance" "app" {
+  name = "reddit-app"
 
+  labels = {
+    tags = "reddit-app"
+  }
+  resources {
+    cores  = 1
+    memory = 2
+  }
+
+  boot_disk {
+    initialize_params {
+      image_id = var.app_disk_image
+    }
+  }
+
+  network_interface {
+    subnet_id = yandex_vpc_subnet.app-subnet.id
+    nat = true
+  }
+
+  metadata = {
+  ssh-keys = "ubuntu:${file(var.public_key_path)}"
+  }
+}
+~~~
+
+И создадим файл 'db.tf', куда вынесем конфигурацию для VM с приложением:
+~~~hcl
+resource "yandex_compute_instance" "db" {
+  name = "reddit-db"
+  labels = {
+    tags = "reddit-db"
+  }
+
+  resources {
+    cores  = 1
+    memory = 2
+  }
+
+  boot_disk {
+    initialize_params {
+      image_id = var.db_disk_image
+    }
+  }
+
+  network_interface {
+    subnet_id = yandex_vpc_subnet.app-subnet.id
+    nat = true
+  }
+
+  metadata = {
+  ssh-keys = "ubuntu:${file(var.public_key_path)}"
+  }
+}
+~~~
+
+Не забудем объявить соответствующие переменные для образов приложения и базы данных в 'variables.tf':
+
+~~~hcl
+variable app_disk_image {
+  description = "Disk image for reddit app"
+  default = "reddit-app-base"
+
+variable db_disk_image {
+  description = "Disk image for reddit db"
+  default = "reddit-db-base"
+  }
+}
+~~~
+
+Создадим файл vpc.tf, в который вынесем конфигурацию сети и подсети, которое применимо для всех инстансов нашей сети.
+~~~hcl
+
+~~~
 ## **Полезное:**
 </details>
