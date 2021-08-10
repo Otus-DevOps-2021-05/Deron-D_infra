@@ -903,7 +903,7 @@ dynamic "target" {
 git checkout -b terraform-2
 git mv terraform/lb.tf terraform/files/
 ```
-2. Зададим IP для инстанса с приложением в виде внешнего ресурса, добавив в 'main.tf':
+2. Зададим IP для инстанса с приложением в виде внешнего ресурса, добавив в `main.tf`:
 
 ```hcl
 resource "yandex_vpc_network" "app-network" {
@@ -1023,7 +1023,63 @@ variable db_disk_image {
 
 Создадим файл `vpc.tf`, в который вынесем конфигурацию сети и подсети, которое применимо для всех инстансов нашей сети.
 ~~~hcl
+resource "yandex_vpc_network" "app-network" {
+  name = "app-network"
+}
 
+resource "yandex_vpc_subnet" "app-subnet" {
+  name           = "app-subnet"
+  zone           = "ru-central1-a"
+  network_id     = "${yandex_vpc_network.app-network.id}"
+  v4_cidr_blocks = ["192.168.10.0/24"]
+}
 ~~~
+
+В итоге, в файле `main.tf` должно остаться только определение провайдера:
+~~~hcl
+provider "yandex" {
+  version                  = 0.35
+  service_account_key_file = var.service_account_key_file
+  cloud_id                 = var.cloud_id
+  folder_id                = var.folder_id
+  zone                     = var.zone
+}
+~~~
+
+Не забудем добавить nat адреса инстансов в `outputs.tf` переменные:
+~~~hcl
+output "external_ip_address_app" {
+  value = yandex_compute_instance.app.network_interface.0.nat_ip_address
+}
+output "external_ip_address_db" {
+  value = yandex_compute_instance.db.network_interface.0.nat_ip_address
+}
+~~~
+
+Планируем и применяем изменения одной командой:
+~~~bash
+terraform apply --auto-approve
+...
+Apply complete! Resources: 2 added, 0 changed, 0 destroyed.
+Outputs:
+external_ip_address_app = 178.154.220.171
+external_ip_address_db = 178.154.200.211
+~~~
+
+Проверим доступность по SSH:
+~~~bash
+➜  terraform git:(terraform-2) ✗ ssh ubuntu@178.154.220.171 -i ~/.ssh/appuser
+➜  terraform git:(terraform-2) ✗ ssh ubuntu@178.154.200.211 -i ~/.ssh/appuser
+~~~
+
+Удалим созданные ресурсы, используя terraform destroy
+~~~bash
+terraform destroy --auto-approve
+~~~
+
+6. Создание модулей
+
+
+
 ## **Полезное:**
 </details>
