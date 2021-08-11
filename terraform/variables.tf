@@ -38,3 +38,12 @@ variable db_disk_image {
   description = "Disk image for reddit db"
   default     = "reddit-db-base"
 }
+variable bucket_name {
+  description = "Yandex bucket name"
+}
+variable access_key {
+  description = "Key_id for yandex s3"
+}
+variable secret_key {
+  description = "Secret for yandex s3"
+}

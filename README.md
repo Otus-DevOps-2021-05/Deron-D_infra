@@ -1317,9 +1317,134 @@ terraform destroy --auto-approve
 
 Отформатируем конфигурационные файлы, используя команду `terraform fmt`
 
+8. Настройка хранения стейт файла в удаленном бекенде. Задание со ⭐
+
+~~~bash
+➜  Deron-D_infra git:(terraform-2) ✗ yc iam service-account list
++----------------------+---------+
+|          ID          |  NAME   |
++----------------------+---------+
+| aje0qs1bcqu8rckr53aq | svcuser |
+| aje6upad8qvh1nri7dld | appuser |
+| ajee7g8ig96qqk45gufm | trfuser |
++----------------------+---------+
+
+➜  Deron-D_infra git:(terraform-2) ✗ yc iam access-key create --service-account-name trfuser
+access_key:
+  id: ajehu3smo5o7v4pkc3rm
+  service_account_id: ajee7g8ig96qqk45gufm
+  created_at: "2021-08-11T19:29:47.457399290Z"
+  key_id: access-key
+secret: secret-key
+~~~
+
+Соответственно заносим полученные данные в `variables.tf` и `terraform.tvars`
+
+Планируем и вносим изменения в инфраструктуру:
+
+~~~bash
+➜  terraform git:(terraform-2) ✗ terraform plan
+Refreshing Terraform state in-memory prior to plan...
+The refreshed state will be used to calculate this plan, but will not be
+persisted to local or remote state storage.
+
+
+------------------------------------------------------------------------
+
+An execution plan has been generated and is shown below.
+Resource actions are indicated with the following symbols:
+  + create
+
+Terraform will perform the following actions:
+
+  # yandex_storage_bucket.otus-storage-bucket will be created
+  + resource "yandex_storage_bucket" "otus-storage-bucket" {
+      + access_key         = "access-key"
+      + acl                = "private"
+      + bucket             = "otus-bucket"
+      + bucket_domain_name = (known after apply)
+      + force_destroy      = false
+      + id                 = (known after apply)
+      + secret_key         = (sensitive value)
+      + website_domain     = (known after apply)
+      + website_endpoint   = (known after apply)
+    }
+
+Plan: 1 to add, 0 to change, 0 to destroy.
+
+➜  terraform git:(terraform-2) ✗ terraform apply -auto-approve
+yandex_storage_bucket.otus-storage-bucket: Creating...
+yandex_storage_bucket.otus-storage-bucket: Creation complete after 0s [id=otus-bucket]
+
+Apply complete! Resources: 1 added, 0 changed, 0 destroyed.
+~~~
+
+В окружениях stage и prod создаем backend.tf:
+
+~~~hcl
+terraform {
+  backend "s3" {
+    endpoint   = "storage.yandexcloud.net"
+    bucket     = "otus-bucket"
+    region     = "ru-central1-a"
+    key        = "terraform.tfstate"
+    # access_key = var.access_key
+    # secret_key = var.secret_key
+    access_key = "access-key"
+    secret_key = "secret-key"
+
+    skip_region_validation      = true
+    skip_credentials_validation = true
+   }
+}
+
+~~~
+
+Проверяем сохранение state VM's для каждого из окружений в bucket 'otus-bucket'
+~~~bash
+➜  prod git:(terraform-2) ✗ cd ../stage
+➜  stage git:(terraform-2) ✗ pwd
+/home/dpp/otus-devops/Deron-D_infra/terraform/stage
+➜  stage git:(terraform-2) ✗ terraform apply -auto-approve
+data.yandex_compute_image.app_image: Refreshing state...
+data.yandex_compute_image.db_image: Refreshing state...
+module.app.yandex_compute_instance.app: Creating...
+module.db.yandex_compute_instance.db: Creating...
+module.db.yandex_compute_instance.db: Still creating... [10s elapsed]
+module.app.yandex_compute_instance.app: Still creating... [10s elapsed]
+module.app.yandex_compute_instance.app: Still creating... [20s elapsed]
+module.db.yandex_compute_instance.db: Still creating... [20s elapsed]
+module.db.yandex_compute_instance.db: Still creating... [30s elapsed]
+module.app.yandex_compute_instance.app: Still creating... [30s elapsed]
+module.app.yandex_compute_instance.app: Creation complete after 38s [id=fhmlrq77m98nick4v2g9]
+module.db.yandex_compute_instance.db: Still creating... [40s elapsed]
+module.db.yandex_compute_instance.db: Creation complete after 40s [id=fhmbi51mj3cg0lnpsa1v]
+
+Apply complete! Resources: 2 added, 0 changed, 0 destroyed.
+
+Outputs:
+
+external_ip_address_app = 130.193.50.99
+external_ip_address_db = 84.201.132.24
+
+➜  stage git:(terraform-2) ✗ cd ../prod
+➜  prod git:(terraform-2) ✗ terraform apply -auto-approve
+data.yandex_compute_image.db_image: Refreshing state...
+data.yandex_compute_image.app_image: Refreshing state...
+module.app.yandex_compute_instance.app: Refreshing state... [id=fhmlrq77m98nick4v2g9]
+module.db.yandex_compute_instance.db: Refreshing state... [id=fhmbi51mj3cg0lnpsa1v]
+
+Apply complete! Resources: 0 added, 0 changed, 0 destroyed.
+
+Outputs:
+
+external_ip_address_app = 130.193.50.99
+external_ip_address_db = 84.201.132.24
+~~~
+
 
 ## **Полезное:**
 
 [Публичный от HashiCorp реестр модулей для terraform](https://registry.terraform.io/)
-
+[yandex_storage_bucket](https://registry.terraform.io/providers/yandex-cloud/yandex/latest/docs/resources/storage_bucket)
 </details>
