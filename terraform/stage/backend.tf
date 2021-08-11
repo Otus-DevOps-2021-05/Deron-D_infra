@@ -6,9 +6,9 @@ terraform {
     key        = "terraform.tfstate"
     # access_key = var.access_key
     # secret_key = var.secret_key
-    access_key = "pnT02nSkjjDaNAhQ8EWd"
-    secret_key = "WGJC6UdKBTozEitYv-Yt074HTUaJ9RaklXhQB8LX"
-    
+    access_key = "access-key"
+    secret_key = "secret-key"
+
     skip_region_validation      = true
     skip_credentials_validation = true
    }
