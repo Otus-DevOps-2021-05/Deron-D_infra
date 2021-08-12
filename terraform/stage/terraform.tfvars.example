@@ -6,3 +6,5 @@ public_key_path = "~/.ssh/appuser.pub"
 subnet_id = "exampleexampleexample"
 service_account_key_file = "key.json"
 private_key_path = "~/.ssh/appuser"
+bucket_name              = "otus-bucket"
+enable_provision         = true
