@@ -11,3 +11,7 @@ variable subnet_id {
 variable private_key_path {
   description = "path to private key"
 }
+variable enable_provision {
+  description = "Enable provision"
+  # default     = true
+}

@@ -11,3 +11,10 @@ variable subnet_id {
 variable private_key_path {
   description = "path to private key"
 }
+variable db_ipaddr {
+  description = "Database IP address"
+}
+variable enable_provision {
+  description = "Enable provision"
+  # default     = true
+}

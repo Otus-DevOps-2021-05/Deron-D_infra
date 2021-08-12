@@ -20,7 +20,10 @@ module "app" {
   private_key_path = var.private_key_path
   app_disk_image   = "${data.yandex_compute_image.app_image.id}"
   subnet_id        = var.subnet_id
+  db_ipaddr        = module.db.internal_ip_address_db
 }
+
+
 module "db" {
   source           = "../modules/db"
   public_key_path  = var.public_key_path

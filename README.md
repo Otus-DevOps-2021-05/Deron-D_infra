@@ -1442,9 +1442,43 @@ external_ip_address_app = 130.193.50.99
 external_ip_address_db = 84.201.132.24
 ~~~
 
+9. Настройка provisioner. Задание со ⭐⭐
+
+Добавим переменную на включения/отключения provisioner в `variables.tf` окружений stage|prod:
+~~~hcl
+variable enable_provision {
+  description = "Enable provision"
+  default = true
+}
+~~~
+
+Добавляем в 'main.tf' для модулей app и db соответственно следующий код перед секцией connection:
+~~~hcl
+resource "null_resource" "app" {
+  count = var.enable_provision ? 1 : 0
+  triggers = {
+    cluster_instance_ids = yandex_compute_instance.app.id
+  }
+
+...
+resource "null_resource" "db" {
+  count = var.enable_provision ? 1 : 0
+  triggers = {
+    cluster_instance_ids = yandex_compute_instance.db.id
+  }
+~~~
+
+Добавляем передачу значений переменной enable_provision в секции вызова модуля 'main.tf'
+~~~hcl
+module "db|app" {
+  ...
+  enable_provision = var.enable_provision
+  ...
+~~~
 
 ## **Полезное:**
 
-[Публичный от HashiCorp реестр модулей для terraform](https://registry.terraform.io/)
-[yandex_storage_bucket](https://registry.terraform.io/providers/yandex-cloud/yandex/latest/docs/resources/storage_bucket)
+- [Публичный от HashiCorp реестр модулей для terraform](https://registry.terraform.io/)
+- [yandex_storage_bucket](https://registry.terraform.io/providers/yandex-cloud/yandex/latest/docs/resources/storage_bucket)
 </details>
+- [Provisioners Without a Resource](https://www.terraform.io/docs/language/resources/provisioners/null_resource.html)

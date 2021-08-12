@@ -25,26 +25,30 @@ resource "yandex_compute_instance" "db" {
     ssh-keys = "ubuntu:${file(var.public_key_path)}"
   }
 
+  scheduling_policy {
+    preemptible = true
+  }
+}
+
+resource "null_resource" "db" {
+  count = var.enable_provision ? 1 : 0
+  triggers = {
+    cluster_instance_ids = yandex_compute_instance.db.id
+  }
+
   connection {
     type  = "ssh"
-    host  = self.network_interface.0.nat_ip_address
+    host  = yandex_compute_instance.db.network_interface[0].nat_ip_address
     user  = "ubuntu"
     agent = false
     # путь до приватного ключа
     private_key = file(var.private_key_path)
   }
-
-  scheduling_policy {
-    preemptible = true
+  provisioner "file" {
+    content     = templatefile("${path.module}/files/mongod.conf.tmpl", { db_ipaddr = yandex_compute_instance.db.network_interface.0.ip_address })
+    destination = "/tmp/mongod.conf"
   }
-
-  # provisioner "file" {
-  #   source      = "files/puma.service"
-  #   destination = "/tmp/puma.service"
-  # }
-  #
-  # provisioner "remote-exec" {
-  #   script = "files/deploy.sh"
-  # }
-
+  provisioner "remote-exec" {
+    script = "${path.module}/files/deploy.sh"
+  }
 }

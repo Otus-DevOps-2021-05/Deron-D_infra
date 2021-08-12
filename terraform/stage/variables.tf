@@ -47,3 +47,7 @@ variable access_key {
 variable secret_key {
   description = "Secret for yandex s3"
 }
+variable enable_provision {
+  description = "Enable provision"
+  default     = true
+}

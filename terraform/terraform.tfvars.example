@@ -9,3 +9,4 @@ private_key_path = "~/.ssh/appuser"
 access_key = "access-key"
 secret_key = "secret-key"
 bucket_name = "otus_bucket"
+enable_provision         = true
