@@ -16,5 +16,5 @@ variable db_ipaddr {
 }
 variable enable_provision {
   description = "Enable provision"
-  # default     = true
+  default     = true
 }
