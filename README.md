@@ -1479,6 +1479,8 @@ module "db|app" {
 ## **Полезное:**
 
 - [Публичный от HashiCorp реестр модулей для terraform](https://registry.terraform.io/)
+- [Загрузка состояний Terraform в Object Storage](https://cloud.yandex.ru/docs/solutions/infrastructure-management/terraform-state-storage)
 - [yandex_storage_bucket](https://registry.terraform.io/providers/yandex-cloud/yandex/latest/docs/resources/storage_bucket)
-</details>
 - [Provisioners Without a Resource](https://www.terraform.io/docs/language/resources/provisioners/null_resource.html)
+
+</details>
